@@ -1,0 +1,27 @@
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+#include <WiFi.h>
+#include <esp_now.h>
+#include <esp_camera.h>
+#include <WebServer.h>
+#include <esp32cam.h>
+
+const char* WIFI_SSID = "CleanTECH";
+const char* WIFI_PASS = "Jordiiiii";
+const char* URL = "/cam.jpg";
+
+//static auto RES = esp32cam:: Resolution :: find(800,600);
+
+WebServer server(80);
+
+void serveJpg(){
+}
+
+void setup(){
+
+}
+
+void loop(){
+    
+}
