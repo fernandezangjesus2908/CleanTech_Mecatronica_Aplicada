@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"name": "Sistema Mecatronica Aplicada",
+			"path": "../Sistema Mecatronica Aplicada"
+		},
+		{
+			"name": "Proyecto_Incubadora",
+			"path": "../Proyecto_Incubadora"
+		},
+		{
+			"name": "Sistema de camara Mecatronica aplicada",
+			"path": "."
+		},
+		{
+			"path": "../../../Pagina de Doki Doki Physics Club"
+		},
+		{
+			"path": "../../../Semestre 9no/Femeci"
+		},
+		{
+			"path": "../../../Semestre 8vo/PlatformIO/Projects/Innovatec"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "Sistema Mecatronica Aplicada"
+	}
+}
