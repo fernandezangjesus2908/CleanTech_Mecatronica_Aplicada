@@ -1,47 +1,60 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <TinyGPS++.h>
-#include <WiFi.h>
-#include <esp_now.h>
+//#include <esp_now.h>
 #include <WiFi.h>
 #include <string.h>
 #include <math.h>
 #include <DFRobot_BMI160.h>
+#include <Pins_CleanTECH.h>
+#include <Wire.h>
 
-#define Sensor_Encoder ;
-#define Sensor_BMI ;
-#define EnableA 6
-#define EnableA_DER 7
-#define RotAIz 4
-#define RotADer 5
+//Seleccion de modo de operacion para el sistema.
+#define MODO_SIMULACION false
 
-#define EnableB 17
-#define EnableB_DER 18
-#define RotBIz 15
-#define RotBDer 16
-
-#define PWM_Torque 9
-#define PWM_Torque_DER 10
-#define RotTorqueIZ 8
-#define RotTorqueDER 3
+//Cada uno de los pines esta registrado dentro del archivo Pins_CleanTECH. 
 
 int Agno, i, Inicio, Fin, rslt, modo = 2;
 
-// Tiempos de retardo
+// Tiempos de retardo para la ejecucion de la odometria
 int Tiempo_Retardo_odometria;
 
 // Variables enteras de odometria.
 int Sensor_Izquierdo, Sensor_Derecho, Contador_Izquierdo = 0, Contador_Derecho = 0, Frecuencia_de_torque = 13500;
+int Estadisticas_Del_GPS =0;
+
 bool Estado_Izquierdo, Estado_Derecho;
+
+// Modo pensado para la verificación de los parametros del sistema.
+
+bool CHEQUEO_Paramteros, GPS_Posicion_Origen!, GPS_FIX!;
+
 float Diametro, Resolución_del_Encoder, Distancia_Entre_Ruedas, Factor_de_Conversion = (PI * Diametro) / Resolución_del_Encoder;
 float Distancia_Rueda_Izquierda, Distancia_Rueda_Derecha, Distancia_Centro_Robot;
 float theta, x, y, deltaPulsosUltimo, pulsosEncoder;
-const int IN_RPWM = 18, PIN_LPWM = 16, FREQ = 15000,RESOLUTION = 8; 
-const int CH_RPWM = 0, CH_LPWM = 1, PIN_ENC_A = 25, PIN_ENC_B = 26; 
+float GPS_Eje_X, GPS_Eje_Y, Latitud_De_Origen=0.0, Longitud_De_Origen=0.0;
+
+constexpr int IN_RPWM = 18, PIN_LPWM = 16, FREQ = 15000,RESOLUTION = 8; 
+constexpr int CH_RPWM = 0, CH_LPWM = 1, PIN_ENC_A = 25, PIN_ENC_B = 26; 
+constexpr int GZ_IDX = 2, ;
+
+constexpr int PWM_MIN_RUEDA = 50;
+
+//Variables de la ejecución PID.
+constexpr float KP_RUMBO,KI_RUMBO,KD_RUMBO,CORR_MAX_RUMBO,INT_MAX_RUMBO;
+
+
+
+constexpr unsigned long Minimo_Pulsos= 200;
+
 
 unsigned long Tiempo_Actual, Tiempo_Anterior, chars, dt;
 unsigned short Sentencias, Fallo_Revision;
-byte Mes, Dia, Hora, Minuto, Segundo;
+
+volatile unsigned long Ultimo_Pulso_Encoder_Derecha = 0,Ultimo_Pulso_Encoder_Izquierda = 0;
+
+//byte Mes, Dia, Hora, Minuto, Segundo;
+
 DFRobot_BMI160 bmi160;
 
 enum DIRECCION
@@ -54,20 +67,21 @@ DIRECCION ultimaAccion = NINGUNO;
 
 typedef struct
 {
-    int ValX_Der;
-    int ValX_Iz;
-    int ValY_Arriba;
-    int ValY_Abajo;
-    bool EjeMazoDer;
-    bool EjeMazoIz;
+    
 } struct_message;
 
+//Permite la comparticion de los datos de entrada del ESP-CAM mediante
+//El protocolo de ESP-NOW
 struct_message incomingData;
+
 volatile bool newDataReceived = false;
 
 uint8_t broadcastAdress[] = {0x1C, 0xDB, 0xD4, 0x40, 0x37, 0x64};
-const int8_t i2c_addr = 0x69;
+
+constexpr int8_t i2c_addr = 0x69;
+
 uint16_t accelGyro[6] = {0};
+
 // Manda indicacióne de como se debe comportar el robot segun que entrada se le mande
 
 void controlarMotor(int pwmIzq, int pwmDer, int dirIzq, int dirDer, int velocidad, bool girarIzq, bool girarDer)
@@ -157,10 +171,18 @@ void Odometria()
     }
 }
 
+void Localizacion_GPS(double Latitud, double Longitud, float &xOut, ){
+
+}
+
 void puenteHTorque(bool Golpe_izquierdo, bool Golpe_Derecho)
 {
 
 }
+
+//Prueba de estabilidad para la formacion de un cuadrado:
+
+enum Estado
 
 void alerta_prueba(bool Falla){
 if(Falla){
@@ -175,9 +197,6 @@ void Deteccion_Pruebas(){
 
 }
 
-void Esp_cam(){
-
-}
 
 void setup()
 {
@@ -212,6 +231,11 @@ void setup()
     ledcSetup(5, Frecuencia_de_torque, 12);
     ledcAttachPin(PWM_Torque_DER, 5);
 }
+
+void Panel_Giroscopio_loop(){
+
+}
+
 void loop()
 {
     Tiempo_Actual = micros();

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CleanTECH - Control y Odometría</title>
+    <link rel="stylesheet" href="/data/Odometria/Interfaz_Odomtetria.css" />
+        <script src="/data/Odometria/Interfaz_Odomtetria.js"></script>
+
+  </head>
+  <body>
+    <div class="dashboard-card">
+      <header class="header">
+        <div class="status-indicator" id="statusIndicator"></div>
+        <h1>CleanTECH Motor Control</h1>
+        <span class="badge" id="connBadge">Conectando...</span>
+      </header>
+
+      <!-- Configuración de Conexión -->
+      <section class="config-panel">
+        <div class="input-group">
+          <label for="espIp">IP del ESP32:</label>
+          <input
+            type="text"
+            id="espIp"
+            value="192.168.4.1"
+            placeholder="Ej: 192.168.4.1"
+          />
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="simMode" />
+          <label for="simMode">Modo Simulación</label>
+        </div>
+      </section>
+
+      <!-- Tacómetro y Velocidad Real -->
+      <section class="gauge-section">
+        <div class="gauge-container">
+          <div class="gauge-rotor" id="rotorVisual">
+            <div class="notch n1"></div>
+            <div class="notch n2"></div>
+          </div>
+          <div class="gauge-center">
+            <span class="gauge-val" id="rpmDisplay">0.0</span>
+            <span class="gauge-unit">RPM REALES</span>
+          </div>
+        </div>
+        <div class="speed-percent" id="percentDisplay">PWM: 0 (0%)</div>
+      </section>
+
+      <!-- Tarjetas de Telemetría Odometría -->
+      <section class="telemetry-grid">
+        <div class="metric-card">
+          <span class="metric-title">Pulsos Totales</span>
+          <span class="metric-val" id="pulsesDisplay">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Vueltas de Eje</span>
+          <span class="metric-val" id="turnsDisplay">0.00</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Pulsos / 200ms</span>
+          <span class="metric-val" id="deltaDisplay">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Sentido Giro</span>
+          <span class="metric-val" id="dirDisplay">Paro</span>
+        </div>
+      </section>
+
+      <!-- Slider de PWM -->
+      <section class="slider-section">
+        <div class="slider-header">
+          <label for="speedSlider">Potencia PWM (0 - 255):</label>
+          <span id="sliderValDisplay">0</span>
+        </div>
+        <input type="range" id="speedSlider" min="0" max="255" value="0" />
+        <div class="slider-ticks">
+          <span>0</span>
+          <span>64</span>
+          <span>128</span>
+          <span>192</span>
+          <span>255</span>
+        </div>
+      </section>
+
+      <!-- Presets rápidos -->
+      <section class="preset-buttons">
+        <button class="btn btn-preset" onclick="setPreset(0)">0%</button>
+        <button class="btn btn-preset" onclick="setPreset(64)">25%</button>
+        <button class="btn btn-preset" onclick="setPreset(128)">50%</button>
+        <button class="btn btn-preset" onclick="setPreset(180)">70%</button>
+        <button class="btn btn-preset" onclick="setPreset(255)">100%</button>
+      </section>
+
+      <!-- Controles de Sentido y Paro -->
+      <section class="direction-controls">
+        <button
+          class="btn btn-dir active"
+          id="btnForward"
+          onclick="setDirection('adelante')"
+        >
+          ▲ Adelante
+        </button>
+        <button class="btn btn-stop" id="btnStop" onclick="emergencyStop()">
+          ■ Paro
+        </button>
+        <button
+          class="btn btn-dir"
+          id="btnReverse"
+          onclick="setDirection('atras')"
+        >
+          ▼ Reversa
+        </button>
+        <!-- <button
+          class="btn btn-dir"
+          id="btnReverse"
+          onclick="setDirection('atras')"
+        >
+          JN
+        </button>
+        <button
+          class="btn btn-dir"
+          id="btnReverse"
+          onclick="setDirection('atras')"
+        >
+          JN
+        </button>
+        <button
+          class="btn btn-dir"
+          id="btnReverse"
+          onclick="setDirection('atras')"
+        >
+          JN
+        </button> -->
+      </section>
+
+      <!-- Botón Reset Odometría -->
+      <section class="reset-section">
+        <button class="btn btn-reset" onclick="resetOdometry()">
+          ↺ Reiniciar Conteo Odometría
+        </button>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer-telemetry">
+        <div class="telemetry-item">
+          <span>Último Comando:</span>
+          <code id="httpLog">Listo</code>
+        </div>
+      </footer>
+    </div>
+
+  </body>
+</html>

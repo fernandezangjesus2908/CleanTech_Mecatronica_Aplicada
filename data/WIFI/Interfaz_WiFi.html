@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>CleanTECH · Conexión WiFi</title>
+    <link rel="stylesheet" href="/data/WIFI/Interfaz_WiFi.css">
+</head>
+<body>
+<div class="phone">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <h1>CleanTECH</h1>
+        <div class="status wait" id="status">SIN CONEXIÓN</div>
+    </div>
+
+    <!-- ===== BIENVENIDA ===== -->
+    <div class="welcome">
+        <h2>Bienvenido al sistema de recolección CleanTECH</h2>
+        <p>
+            Autómata autónomo de <strong>detección y recolección de residuos</strong> basado en
+            visión artificial, odometría y navegación por GPS.
+        </p>
+        <p style="margin-top:8px;">
+            Para comenzar, selecciona la red WiFi a la que se conectará el robot.
+        </p>
+    </div>
+
+    <!-- ===== PASO ACTUAL ===== -->
+    <div class="info-box">
+        <div class="left">
+            <div>Paso: <strong>1 de 2</strong></div>
+            <div class="estado-texto" id="estadoModo">Modo configuración (AP)</div>
+        </div>
+        <div class="total">WiFi</div>
+    </div>
+
+    <!-- ===== DATOS DEL ROBOT ===== -->
+    <div class="cards">
+        <div class="card">
+            <div class="number" id="estadoRed">--</div>
+            <div class="label">Red</div>
+        </div>
+        <div class="card">
+            <div class="number small" id="numRedes">0</div>
+            <div class="label">Redes</div>
+        </div>
+        <div class="card">
+            <div class="number small" id="modoAP">AP</div>
+            <div class="label">Modo</div>
+        </div>
+    </div>
+
+    <!-- ===== FORMULARIO WIFI ===== -->
+    <div class="panel">
+        <div class="panel-header">
+            Red WiFi
+            <span class="badge">ESP32-S3</span>
+        </div>
+
+        <form id="configForm">
+            <label class="campo" for="ssid">Red disponible</label>
+            <select id="ssid" required>
+                <option value="">Buscando redes...</option>
+            </select>
+
+            <label class="campo" for="password">Contraseña</label>
+            <div class="fila-pass">
+                <input type="password" id="password" placeholder="••••••••" required>
+                <button type="button" class="ver-pass" id="verPass">VER</button>
+            </div>
+
+            <button type="submit" class="btn-wp add" id="btnGuardar">Guardar y conectar</button>
+            <button type="button" class="btn-wp ghost" id="btnEscanear">Volver a escanear</button>
+        </form>
+    </div>
+
+    <!-- ===== CAPACIDADES DEL PROYECTO ===== -->
+    <div class="features">
+        <h3>¿Qué hace CleanTECH?</h3>
+
+        <div class="feature">
+            <div class="ico">🗑️</div>
+            <div class="txt">
+                <strong>Recolección autónoma</strong>
+                Detecta residuos en el área de trabajo y ejecuta su recolección sin intervención manual.
+            </div>
+        </div>
+
+        <div class="feature">
+            <div class="ico">👁️</div>
+            <div class="txt">
+                <strong>Visión artificial (Edge Impulse)</strong>
+                Modelo de detección de objetos embebido para identificar residuos y obstáculos.
+            </div>
+        </div>
+
+        <div class="feature">
+            <div class="ico">📍</div>
+            <div class="txt">
+                <strong>Navegación por waypoints</strong>
+                GPS + brújula/giroscopio para trazar rutas de punto a punto y regresar al origen.
+            </div>
+        </div>
+
+        <div class="feature">
+            <div class="ico">⚙️</div>
+            <div class="txt">
+                <strong>Odometría con encoders</strong>
+                Control de velocidad independiente por rueda y corrección de trayectoria en tiempo real.
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOG ===== -->
+    <div class="log" id="log">Conéctate a la red <strong>ESP32_Config</strong> y selecciona tu WiFi de trabajo.</div>
+
+    <div class="footnote">CleanTECH · Instituto Tecnológico de Culiacán · Mecatrónica Aplicada</div>
+</div>
+
+<script src="/data/WIFI/Interfaz_WiFi.js"></script>
+</body>
+</html>

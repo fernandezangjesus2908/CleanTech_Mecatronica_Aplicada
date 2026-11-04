@@ -1,0 +1,370 @@
+//Configuracion de la interfaz en lenguaje sass.
+
+// ===== Variables de color =====
+$Color_Fondo_Pagina:     #0b1120;
+$Color_Fondo_Tarjeta:    #1e293b;
+$Color_Fondo_Panel:      #0f172a;
+$Color_Borde:            #334155;
+$Color_Borde_Claro:      #475569;
+$Color_Texto_Principal:  #e2e8f0;
+$Color_Texto_Brillante:  #f8fafc;
+$Color_Texto_Suave:      #94a3b8;
+$Color_Texto_Tenue:      #64748b;
+$Color_Texto_Boton:      #cbd5e1;
+$Color_Acento_Azul:      #38bdf8;
+$Color_Verde_Estado:     #22c55e;
+$Color_Badge_Azul:       #0369a1;
+$Color_Badge_Texto:      #e0f2fe;
+$Color_Dir_Fondo:        #1e3a8a;
+$Color_Dir_Texto:        #93c5fd;
+$Color_Dir_Activo:       #2563eb;
+$Color_Rojo_Fondo:       #dc2626;
+$Color_Rojo_Hover:       #b91c1c;
+$Color_Rojo_Texto:       #fee2e2;
+
+// ===== Variables de tipografía y medidas =====
+$Fuente_Base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+              Oxygen, Ubuntu, Cantarell, sans-serif;
+$Radio_Tarjeta:  1.25rem;
+$Radio_Chico:    0.5rem;
+$Radio_Pildora:  9999px;
+$Ancho_Maximo:   500px;
+
+// ===== Mixin para botones (evita repetir) =====
+@mixin Estilo_Boton_Base {
+    border: none;
+    padding: 0.65rem 0.4rem;
+    border-radius: $Radio_Chico;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+// ===== Reset global =====
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: $Fuente_Base;
+}
+
+body {
+    background: $Color_Fondo_Pagina;
+    color: $Color_Texto_Principal;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+// ===== Tarjeta principal =====
+.dashboard-card {
+    background: $Color_Fondo_Tarjeta;
+    border: 1px solid $Color_Borde;
+    border-radius: $Radio_Tarjeta;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: $Ancho_Maximo;
+    box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.6);
+}
+
+// ===== Encabezado =====
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid $Color_Borde;
+    padding-bottom: 0.75rem;
+
+    h1 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: $Color_Acento_Azul;
+    }
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: $Color_Verde_Estado;
+    box-shadow: 0 0 10px $Color_Verde_Estado;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: $Radio_Pildora;
+    background: $Color_Badge_Azul;
+    color: $Color_Badge_Texto;
+}
+
+// ===== Panel de configuración =====
+.config-panel {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    background: $Color_Fondo_Panel;
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    label {
+        font-size: 0.8rem;
+        color: $Color_Texto_Suave;
+    }
+
+    input {
+        background: $Color_Fondo_Tarjeta;
+        border: 1px solid $Color_Borde_Claro;
+        color: $Color_Texto_Brillante;
+        padding: 0.35rem 0.5rem;
+        border-radius: 0.35rem;
+        font-size: 0.85rem;
+        width: 120px;
+    }
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: $Color_Texto_Suave;
+}
+
+// ===== Sección de medidor circular =====
+.gauge-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.gauge-container {
+    position: relative;
+    width: 155px;
+    height: 155px;
+    border-radius: 50%;
+    border: 4px solid $Color_Borde;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: $Color_Fondo_Panel;
+}
+
+.gauge-rotor {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px dashed $Color_Acento_Azul;
+    transition: transform 0.05s linear;
+}
+
+.gauge-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+.gauge-val {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: $Color_Texto_Brillante;
+}
+
+.gauge-unit {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $Color_Acento_Azul;
+    letter-spacing: 0.05em;
+}
+
+.speed-percent {
+    margin-top: 0.6rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $Color_Texto_Suave;
+}
+
+// ===== Grilla de métricas =====
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+}
+
+.metric-card {
+    background: $Color_Fondo_Panel;
+    border: 1px solid $Color_Borde;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.6rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.metric-title {
+    font-size: 0.75rem;
+    color: $Color_Texto_Suave;
+    margin-bottom: 0.2rem;
+}
+
+.metric-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: $Color_Acento_Azul;
+}
+
+// ===== Sección del slider =====
+.slider-section {
+    margin-bottom: 1.25rem;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: $Color_Texto_Suave;
+    margin-bottom: 0.5rem;
+}
+
+#sliderValDisplay {
+    font-weight: 700;
+    color: $Color_Acento_Azul;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: $Color_Borde;
+    outline: none;
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: $Color_Acento_Azul;
+        box-shadow: 0 0 10px $Color_Acento_Azul;
+        cursor: pointer;
+    }
+}
+
+.slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: $Color_Texto_Tenue;
+    margin-top: 0.35rem;
+}
+
+// ===== Botones preestablecidos =====
+.preset-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+}
+
+.btn {
+    @include Estilo_Boton_Base;
+}
+
+.btn-preset {
+    background: $Color_Borde;
+    color: $Color_Texto_Boton;
+    font-size: 0.75rem;
+
+    &:hover {
+        background: $Color_Borde_Claro;
+        color: #fff;
+    }
+}
+
+// ===== Controles de dirección =====
+.direction-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.btn-dir {
+    background: $Color_Dir_Fondo;
+    color: $Color_Dir_Texto;
+    font-size: 0.85rem;
+
+    &.active {
+        background: $Color_Dir_Activo;
+        color: #ffffff;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
+    }
+}
+
+.btn-stop {
+    background: $Color_Rojo_Fondo;
+    color: $Color_Rojo_Texto;
+    font-size: 0.9rem;
+
+    &:hover {
+        background: $Color_Rojo_Hover;
+    }
+}
+
+// ===== Sección de reset =====
+.reset-section {
+    margin-bottom: 1.2rem;
+}
+
+.btn-reset {
+    width: 100%;
+    background: $Color_Borde;
+    color: $Color_Texto_Suave;
+    font-size: 0.8rem;
+    padding: 0.55rem;
+
+    &:hover {
+        background: $Color_Borde_Claro;
+        color: $Color_Texto_Brillante;
+    }
+}
+
+// ===== Pie de telemetría =====
+.footer-telemetry {
+    border-top: 1px solid $Color_Borde;
+    padding-top: 0.75rem;
+    font-size: 0.8rem;
+    color: $Color_Texto_Suave;
+}
+
+.telemetry-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+code {
+    background: $Color_Fondo_Panel;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    color: $Color_Acento_Azul;
+    font-size: 0.75rem;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
