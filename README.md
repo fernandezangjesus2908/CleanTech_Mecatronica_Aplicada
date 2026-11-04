@@ -13,7 +13,7 @@ Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del si
 ![alt text](image.png)
 - ### Esp32s3:
 - ### ESP32-CAM con Cámara OV2640:
-https://dcdn-us.mitiendanube.com/stores/003/916/473/products/imagen_2024-03-25_101222678-92fb202300078fef2e17113867463609-1024-1024.webp
+![alt text](image-3.png)
 - ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
 ![alt text](image-1.png)
 - ### Módulo GPS GY-NEO6MV2.
