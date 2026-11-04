@@ -7,7 +7,7 @@ Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del si
 ## Componentes utilizados dentro de la construcción del sistema cleanTECH:
 
 - ### Motoreductor:
-<img width="800" height="800" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
+<img width="80%" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
 
 - ### Sistema buck:
 ![alt text](image.png)
