@@ -1,4 +1,4 @@
-# Sistema recolector de basura CleanTECH.
+# Sistema CleanTECH.
 
 El sistema cleanTECH . Es un sistema automata programado con capacidades de inteligencia artificial que le permite hacer una deteccion de diversos datos de adquisicion de las variables del entorno principales enfocadas a la cuestion de reconocimiento de entidades estaticas o en movimiento.
 
