@@ -20,9 +20,15 @@
 		},
 		{
 			"path": "../../../Semestre 8vo/PlatformIO/Projects/Innovatec"
+		},
+		{
+			"path": "../../../Semestre 8vo/PlatformIO/Projects/Sistema de temperatura telegram"
+		},
+		{
+			"path": "../../../Semestre 8vo/PlatformIO/Projects/Sistema para robobatalla"
 		}
 	],
 	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "Sistema Mecatronica Aplicada"
+		"liveServer.settings.multiRootWorkspaceName": "Sistema de camara Mecatronica aplicada"
 	}
 }

@@ -1,1 +1,222 @@
-/*# sourceMappingURL=Interfaz_CleanTECH.css.map */
+:root {
+  --bg: #0b0e14;
+  --panel: #131720;
+  --border: #232a36;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --sp: #00d4ff;
+  --pv: #00e676;
+  --pv2: #b388ff;
+  --err: #ff5252;
+  --ctrl: #ffc107;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.app header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+.app header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+.app header h1 .brand {
+  color: var(--sp);
+}
+.app header .status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app header .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--err);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.app header .dot.on {
+  background: var(--pv);
+  box-shadow: 0 0 8px var(--pv);
+}
+.app header .dot.warn {
+  background: var(--ctrl);
+  box-shadow: 0 0 8px var(--ctrl);
+}
+.app .toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.app .toolbar .info {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.app .toolbar .info .info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.app .toolbar .info .info-item .dot-mini {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sp);
+}
+.app .toolbar .spacer {
+  flex: 1;
+}
+.app .scope-wrap {
+  position: relative;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.app .scope-wrap:fullscreen {
+  border-radius: 0;
+  aspect-ratio: auto;
+}
+.app .scope-wrap #stream {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+  display: none;
+}
+.app .scope-wrap #stream.on {
+  display: block;
+}
+.app .scope-wrap .overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.app .scope-wrap .overlay.hidden {
+  opacity: 0;
+}
+.app .stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.app .stats .stat {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.app .stats .stat.sp {
+  border-left-color: var(--sp);
+}
+.app .stats .stat.pv {
+  border-left-color: var(--pv);
+}
+.app .stats .stat.pv2 {
+  border-left-color: var(--pv2);
+}
+.app .stats .stat.ctrl {
+  border-left-color: var(--ctrl);
+}
+.app .stats .stat .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.app .stats .stat .value {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.btn:hover:not(:disabled) {
+  background: var(--border);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: var(--sp);
+  border-color: var(--sp);
+  color: #000;
+  font-weight: 600;
+}
+.btn.primary:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+.btn.primary.active {
+  background: var(--err);
+  border-color: var(--err);
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .app .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .app header h1 {
+    font-size: 14px;
+  }
+  .btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}/*# sourceMappingURL=Interfaz_CleanTECH.css.map */

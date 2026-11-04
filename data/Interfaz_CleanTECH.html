@@ -1,12 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script src=""></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanTECH · Camera</title>
+<link rel="stylesheet" href="/data/Interfaz_CleanTECH.css">
 </head>
 <body>
-    
+<div class="app">
+
+  <header>
+    <h1><span class="brand">CleanTECH</span> · Camera</h1>
+    <div class="status">
+      <span class="dot" id="dot"></span>
+      <span id="statusText">Desconectado</span>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="info">
+      <span class="info-item">
+        <span class="dot-mini"></span><span id="infoRes">—</span>
+      </span>
+      <span class="info-item">
+        <span class="dot-mini"></span><span id="infoFps">0.0 FPS</span>
+      </span>
+      <span class="info-item">
+        <span class="dot-mini"></span><span id="infoMode">MJPEG</span>
+      </span>
+    </div>
+
+    <div class="spacer"></div>
+
+    <button class="btn" id="btnPause" disabled>Pausar</button>
+    <button class="btn" id="btnSnapshot" disabled>Snapshot</button>
+    <button class="btn" id="btnFullscreen" disabled>Pantalla completa</button>
+    <button class="btn primary" id="btnConnect">Conectar</button>
+  </div>
+
+  <div class="scope-wrap" id="scopeWrap">
+    <img id="stream" alt="stream">
+    <canvas id="canvas" style="display:none;"></canvas>
+    <div class="overlay" id="overlay">Sin conexión — presiona Conectar</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat sp">
+      <div class="label">Estado</div>
+      <div class="value" id="valState">—</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/data/Interfaz_CleanTECH.js"></script>
 </body>
 </html>
