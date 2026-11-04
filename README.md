@@ -10,7 +10,11 @@ Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del si
 <img width="800" height="800" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
 
 - ### Sistema buck:
+![alt text](image.png)
 - ### Esp32s3:
-- ### Esp32CAM:
-- ### GPY
-- ### Giroscopio
+- ### ESP32-CAM con Cámara OV2640:
+https://dcdn-us.mitiendanube.com/stores/003/916/473/products/imagen_2024-03-25_101222678-92fb202300078fef2e17113867463609-1024-1024.webp
+- ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
+![alt text](image-1.png)
+- ### Módulo GPS GY-NEO6MV2.
+![alt text](image-2.png)
