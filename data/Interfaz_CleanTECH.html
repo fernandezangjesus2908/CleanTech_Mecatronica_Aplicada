@@ -4,7 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CleanTECH · Camera</title>
-<link rel="stylesheet" href="/data/Interfaz_CleanTECH.css">
+<link rel="stylesheet" href="/Interfaz_CleanTECH.css">
+<style>
+  /* Estilos extra para asegurar que el canvas quede sobre el video */
+  .scope-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  #stream {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Permite hacer clic a través del canvas */
+    z-index: 10;
+  }
+</style>
 </head>
 <body>
 <div class="app">
@@ -38,9 +59,10 @@
     <button class="btn primary" id="btnConnect">Conectar</button>
   </div>
 
+  <!-- AQUÍ ESTÁ EL CANVAS SUPERPESTO -->
   <div class="scope-wrap" id="scopeWrap">
     <img id="stream" alt="stream">
-    <canvas id="canvas" style="display:none;"></canvas>
+    <canvas id="canvas"></canvas>
     <div class="overlay" id="overlay">Sin conexión — presiona Conectar</div>
   </div>
 
@@ -49,10 +71,22 @@
       <div class="label">Estado</div>
       <div class="value" id="valState">—</div>
     </div>
+    <div class="stat pv">
+      <div class="label">Resolución</div>
+      <div class="value" id="valRes">—</div>
+    </div>
+    <div class="stat pv2">
+      <div class="label">FPS</div>
+      <div class="value" id="valFps">—</div>
+    </div>
+    <div class="stat ctrl">
+      <div class="label">Tamaño</div>
+      <div class="value" id="valSize">—</div>
+    </div>
   </div>
 
 </div>
 
-<script src="/data/Interfaz_CleanTECH.js"></script>
+<script src="/Interfaz_CleanTECH.js"></script>
 </body>
 </html>

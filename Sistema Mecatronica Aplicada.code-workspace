@@ -26,9 +26,13 @@
 		},
 		{
 			"path": "../../../Semestre 8vo/PlatformIO/Projects/Sistema para robobatalla"
+		},
+		{
+			"path": "../SADI-PID/Proyecto_Incubadora"
 		}
 	],
 	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "Sistema de camara Mecatronica aplicada"
+		"liveServer.settings.multiRootWorkspaceName": "Sistema de camara Mecatronica aplicada",
+		"dotnet.defaultSolution": "Pagina de Doki Doki Physics Club/Juego_GODOT/ddpc---doki-doki-fangame/DDPC - Doki Doki Fangame.sln"
 	}
 }
