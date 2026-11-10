@@ -121,10 +121,6 @@ El documento advierte sobre varios detalles críticos que pueden arruinar tu pro
 * **Voltajes:** El chip no usa un solo voltaje. Tiene reguladores internos que convierten la energía para diferentes partes: 1.1V para el procesador digital, 1.1V para el reloj de tiempo real (RTC) y 1.8V para la memoria flash.
 * **El botón de encendido (CHIP_PU):** El pin **CHIP_PU** es el encargado de encender o resetear el chip. Para que funcione, debe recibir un voltaje alto (High). El datasheet muestra un gráfico de tiempo: hay que esperar al menos **50 microsegundos** después de que llegue la energía para activar este pin, de lo contrario el chip podría no arrancar correctamente.
 
-- ### ESP32-CAM con Cámara OV2640:
-![alt text](image-3.png)
-
-::include{file=Markdowns/Esp-cam.md}
 - ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
 ![alt text](image-1.png)
 
