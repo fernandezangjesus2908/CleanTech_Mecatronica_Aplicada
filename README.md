@@ -4,14 +4,102 @@ El sistema cleanTECH . Es un sistema automata programado con capacidades de inte
 
 ## Nota importante:
 Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del sistema cleanTECH se desglosara en esta sección del repositorio de gitHUB los parametros que albergan la ejecución del codigo dentro del sistema CleanTECH
+
 ## Componentes utilizados dentro de la construcción del sistema cleanTECH:
 
 - ### Motorreductor JGA25-370 12VDC 330RPM Con Encoder Integrado:
 <img width="33%" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
 
-- ### XL4015 Convertidor DC-DC Buck Reductor:
+El **JGA25-370** es un motorreductor de corriente continua (12V) que incluye un **encoder incremental** para medir con precisión la velocidad y la posición del giro. Sus engranajes metálicos lo hacen resistente y duradero, y su encoder permite conectarlo a microcontroladores como Arduino, ESP32, PIC o Raspberry Pi para sistemas de control realimentado (PID). Es ideal para robótica, automatización y proyectos educativos avanzados.
+
+## Características principales
+- **Modelo:** JGA25-370 DC + Encoder.
+- **Voltaje nominal:** 12 VDC.
+- **Rango de velocidad (sin carga):** 60 – 350 RPM (según la relación de engranajes).
+- **Torque máximo:** 2.5 – 5 kg-cm (según modelo y carga).
+- **Corriente:** 80 – 200 mA sin carga; hasta 1.5 A en carga máxima.
+- **Relación de reducción:** 1:30 a 1:300.
+- **Engranajes:** Metálicos de alta precisión.
+- **Eje de salida:** 4 mm tipo D (longitud 10–12 mm).
+- **Dimensiones:** Longitud total 70–85 mm (con encoder), peso 90–110 g.
+- **Encoder:** Incremental de 2 canales (A y B), resolución de 11–13 pulsos por vuelta del motor (multiplicable por la reducción).
+- **Alimentación del encoder:** 3.3 – 5 VDC (compatible con microcontroladores).
+- **Ruido:** Bajo a moderado.
+
+## Funcionamiento del encoder
+El encoder genera dos señales digitales (A y B) desfasadas 90°. Esto permite medir tanto la **velocidad** como la **dirección** de giro. Se conecta directamente a pines digitales del microcontrolador, usando interrupciones para el canal A y una entrada auxiliar para el B. Alimentación: VCC (5V) y GND.
+
+## Curvas de rendimiento típicas (a 12V)
+| Relación | Velocidad sin carga (RPM) | Corriente sin carga (mA) | Torque máx. (kg-cm) |
+|----------|---------------------------|--------------------------|----------------------|
+| 1:30     | 350                       | 180                      | 2.5                  |
+| 1:50     | 200                       | 160                      | 3.2                  |
+| 1:100    | 120                       | 130                      | 4.0                  |
+| 1:210    | 60                        | 110                      | 5.0                  |
+
+## Aplicaciones comunes
+- Robots móviles y seguidores de línea.
+- Sistemas de control de posición y velocidad.
+- Cámaras motorizadas y mecanismos de dirección.
+- Impresoras 3D, CNC miniatura y automatización ligera.
+- Vehículos autónomos y proyectos educativos de robótica.
+
+## Ventajas
+- Encoder integrado para control preciso.
+- Engranes metálicos resistentes.
+- Funcionamiento silencioso y estable.
+- Amplio rango de velocidad y torque.
+- Bajo consumo energético.
+
+## Recomendaciones de uso
+- No exceder los 12V DC.
+- Verificar polaridad antes de conectar.
+- Fijar el motor correctamente para evitar vibraciones.
+- Usar drivers compatibles (L298N, TB6612FNG, L9110).
+- Filtrar las señales del encoder si hay ruido eléctrico.
+
+## Observaciones finales
+El JGA25-370 es una solución confiable para proyectos que requieren precisión y durabilidad. Su encoder permite una retroalimentación efectiva para sistemas PID y control digital, siendo ideal para aplicaciones educativas, de automatización o experimentales.
+
+- ### XL4015 Convertidor DC-DC Buck Reductor (5A):
 ![alt text](image.png)
-- ### Esp32s3:
+
+El **XL4015** es un módulo integrado (chip) que funciona como un **convertidor reductor de voltaje DC a DC (Buck Converter)**. Su función principal es tomar una corriente continua de mayor voltaje (por ejemplo, de una batería de 12V o 24V) y convertirla de manera muy eficiente en un voltaje menor y estable (como 5V) para alimentar dispositivos electrónicos.
+
+## Características principales
+- **Entrada de voltaje:** Acepta desde **8V hasta 36V**.
+- **Salida ajustable:** Puede entregar desde **1.25V hasta 32V**.
+- **Corriente máxima:** Soporta hasta **5 Amperios** de salida constante.
+- **Alta eficiencia:** Alcanza hasta un **96%**, lo que significa que pierde muy poca energía en forma de calor.
+- **Frecuencia de trabajo:** Opera a 180 kHz (fija).
+- **Encapsulado:** Viene en un paquete compacto TO263-5L, diseñado para disipar bien el calor.
+
+## ¿Cómo funciona?
+El chip utiliza un sistema de modulación por ancho de pulso (PWM) que enciende y apaga un interruptor interno muy rápido. Al combinarse con componentes externos (como un inductor y capacitores), "suaviza" la energía para entregar un voltaje de salida estable. 
+El voltaje de salida se ajusta fácilmente usando dos resistencias externas (un divisor de voltaje) conectadas al pin de retroalimentación (FB); el chip siempre intentará mantener ese pin a 1.25V exactos.
+
+## Distribución de Pines
+El XL4015 tiene 5 pines clave:
+1. **GND:** Tierra (conexión negativa).
+2. **FB:** Retroalimentación (sirve para ajustar el voltaje de salida con resistencias).
+3. **SW:** Salida del interruptor de potencia (se conecta al inductor).
+4. **VC:** Regulador interno (suele llevar un capacitor a la entrada).
+5. **VIN:** Entrada de voltaje (de 8V a 36V).
+
+## Sistemas de Protección Integrados
+Para evitar que el chip o tus dispositivos se dañen, el XL4015 incluye de fábrica:
+- **Límite de corriente:** Corta o limita la energía si se superan los 5A.
+- **Protección contra cortocircuitos:** Si hay un corto en la salida, reduce su frecuencia de trabajo para protegerse.
+- **Apagado térmico:** Si el chip se calienta demasiado, se apaga automáticamente para no quemarse.
+
+## Aplicaciones Comunes
+- Alimentación de monitores LCD y televisores.
+- Instrumentos portátiles y equipos de medición.
+- Equipos de telecomunicaciones y redes.
+- Cualquier proyecto de electrónica o robótica que necesite bajar el voltaje de una batería de forma eficiente sin generar mucho calor (a diferencia de los reguladores lineales tradicionales).
+
+### ESP32-S3-DevKitC-1:
+
 ## 1. Distribución y "Multiplexación" de Pines (Páginas 1 y 2)
 El chip tiene **56 pines** distribuidos en un encapsulado cuadrado. Algo muy importante es que el ESP32-S3 usa **"multiplexación"**. 
 * **¿Qué significa esto?** Que un solo pin físico puede hacer varias funciones diferentes (como enviar datos, leer un sensor, o encender un LED) dependiendo de cómo lo programes por software. Esto permite que el chip sea pequeño sin perder capacidades.
