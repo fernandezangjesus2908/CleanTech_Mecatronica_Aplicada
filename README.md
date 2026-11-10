@@ -36,7 +36,7 @@ El documento advierte sobre varios detalles críticos que pueden arruinar tu pro
 - ### ESP32-CAM con Cámara OV2640:
 ![alt text](image-3.png)
 
-::include{file=/Markdowns/Esp-cam.md}
+::include{file=Markdowns/Esp-cam.md}
 - ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
 ![alt text](image-1.png)
 
