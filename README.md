@@ -56,10 +56,8 @@ El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines in
 - Interfaz para magnetómetro externo: ASDx y ASCx.
 - Interfaz SPI secundaria para estabilización óptica.
 
-## En resumen
-El **BMI160** es un sensor de movimiento compacto, preciso y de bajo consumo que permite detectar orientación, movimiento, pasos, rotaciones y gestos. Es muy usado en teléfonos, relojes inteligentes, drones y dispositivos de realidad aumentada. El datasheet describe sus especificaciones eléctricas, rangos de medición, pines y modos de comunicación para integrarlo en proyectos electrónicos.
 - ### Módulo GPS GY-NEO6MV2.
-
+![alt text](image-2.png) {width=300}
 ## 1. ¿Qué es y cómo funciona el módulo? (Página 1)
 * **Precisión:** Tiene una precisión horizontal de **2.5 metros** y una tasa de actualización de 1 vez por segundo (1Hz).
 * **Indicador LED:** 
@@ -89,7 +87,3 @@ El documento incluye un programa (sketch) en C++ que requiere las librerías `Ti
 * **El archivo final:** Muestra una captura de pantalla del archivo `gpsLOG.txt` abierto en un ordenador, con columnas de fecha, latitud, longitud y hora.
 * **Uso autónomo:** La última imagen muestra el proyecto montado sobre una batería de 6V, demostrando que se puede llevar el Arduino, el GPS y la batería en una mochila o vehículo para registrar rutas sin necesidad de un ordenador.
 * **Paciencia:** Al encenderlo, hay que esperar entre **40 y 120 segundos** (al aire libre) para que la luz del GPS empiece a parpadear y comience a registrar datos.
-
----
-**En resumen:** Es un manual paso a paso para construir un dispositivo casero que guarda en una tarjeta SD dónde ha estado (coordenadas) y a qué hora, utilizando un Arduino.
-![alt text](image-2.png)
