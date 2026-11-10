@@ -57,7 +57,7 @@ El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines in
 - Interfaz SPI secundaria para estabilización óptica.
 
 - ### Módulo GPS GY-NEO6MV2.
-![alt text](image-2.png) {width=300}
+![alt text](image-2.png) {width=50%}
 ## 1. ¿Qué es y cómo funciona el módulo? (Página 1)
 * **Precisión:** Tiene una precisión horizontal de **2.5 metros** y una tasa de actualización de 1 vez por segundo (1Hz).
 * **Indicador LED:** 
