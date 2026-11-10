@@ -134,24 +134,24 @@ Para evitar que el chip o tus dispositivos se dañen, el XL4015 incluye de fábr
 
 ### ESP32-S3-DevKitC-1:
 
-## 1. Distribución y "Multiplexación" de Pines (Páginas 1 y 2)
+## 1. Distribución y "Multiplexación" de Pines.
 El chip tiene **56 pines** distribuidos en un encapsulado cuadrado. Algo muy importante es que el ESP32-S3 usa **"multiplexación"**. 
 * **¿Qué significa esto?** Que un solo pin físico puede hacer varias funciones diferentes (como enviar datos, leer un sensor, o encender un LED) dependiendo de cómo lo programes por software. Esto permite que el chip sea pequeño sin perder capacidades.
 
-## 2. Tipos de Funciones de los Pines (Páginas 6 a 10)
+## 2. Tipos de Funciones de los Pines.
 Los pines se dividen en tres grupos principales:
 * **Pines IO (Entrada/Salida):** Son los pines estándar para conectar componentes (botones, pantallas, relés, etc.). Tienen funciones predefinidas para comunicaciones como UART (puerto serie), SPI (para tarjetas SD y pantallas) y JTAG (para depuración).
 * **Funciones RTC (Real-Time Clock):** Algunos pines siguen funcionando incluso cuando el chip está en modo de "sueño profundo" (Deep-sleep) consumiendo muy poca energía. Son ideales para despertar el chip con un sensor de movimiento o un botón.
 * **Funciones Analógicas:** Ciertos pines pueden leer voltajes variables (Convertidor Analógico-Digital o ADC) o detectar toques capacitivos (Touch Sensor).
 
-## 3. Advertencias Importantes: ¡Cuidado con estos pines! (Páginas 4, 5 y 11)
+## 3. Advertencias Importantes: ¡Cuidado con estos pines!
 El documento advierte sobre varios detalles críticos que pueden arruinar tu proyecto si no los tienes en cuenta:
 * **Pines de Memoria (Flash/PSRAM):** Los pines del 26 al 32 (aproximadamente) están conectados a la memoria interna del chip. **NUNCA** los uses para conectar otras cosas, o el chip se colgará y no arrancará.
 * **Pines de Configuración (Strapping Pins):** Pines como GPIO0, GPIO3, GPIO45 y GPIO46 deciden cómo arranca el chip (por ejemplo, si entra en modo de programación o modo normal). Deben estar en niveles de voltaje específicos al encender.
 * **"Glitches" al Encender:** Algunos pines (como GPIO19 y GPIO20) emiten pequeños pulsos eléctricos (picos) de unos 60 microsegundos justo cuando se enciende el chip. Si tienes conectado un relé o un motor, podría activarse brevemente por error.
 * **Pines de USB y UART0:** Normalmente están reservados para programar el chip y ver los mensajes en la computadora.
 
-## 4. Alimentación y Encendido (Páginas 15 y 16)
+## 4. Alimentación y Encendido.
 * **Voltajes:** El chip no usa un solo voltaje. Tiene reguladores internos que convierten la energía para diferentes partes: 1.1V para el procesador digital, 1.1V para el reloj de tiempo real (RTC) y 1.8V para la memoria flash.
 * **El botón de encendido (CHIP_PU):** El pin **CHIP_PU** es el encargado de encender o resetear el chip. Para que funcione, debe recibir un voltaje alto (High). El datasheet muestra un gráfico de tiempo: hay que esperar al menos **50 microsegundos** después de que llegue la energía para activar este pin, de lo contrario el chip podría no arrancar correctamente.
 
@@ -189,7 +189,7 @@ Aplicaciones típicas:
 - **Interrupciones por hardware:** detección de movimiento, doble toque, orientación, caída libre, impacto, etc.
 - **Compatible con Android 4.4 y Windows 8.1**.
 
-## Distribución de pines (Página 2)
+## Distribución de pines.
 El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines incluyen:
 - Alimentación: VDD, VDDIO, GND, GNDIO.
 - Comunicación: SDA/SDI, SCL/SCK, CSB, SDO.
@@ -199,7 +199,7 @@ El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines in
 
 - ### Módulo GPS GY-NEO6MV2.
 ![alt text](image-2.png) {width=50%}
-## 1. ¿Qué es y cómo funciona el módulo? (Página 1)
+## 1. ¿Qué es y cómo funciona el módulo?
 * **Precisión:** Tiene una precisión horizontal de **2.5 metros** y una tasa de actualización de 1 vez por segundo (1Hz).
 * **Indicador LED:** 
   * **Sin parpadeo:** Está buscando satélites.
@@ -207,14 +207,14 @@ El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines in
 * **Consejo importante:** Debe usarse **al aire libre**; no funciona bien en interiores.
 * **Alimentación:** Aunque opera a 3.3V, se recomienda conectarlo primero a **5V durante 1 o 2 horas** para cargar su batería interna antes de usarlo.
 
-## 2. Conexión y Materiales Necesarios (Páginas 1 y 2)
+## 2. Conexión y Materiales Necesarios.
 Para el proyecto necesitas:
 * Un **Arduino UNO**.
 * El módulo **GY-NEO6MV2**.
 * Un **Shield (placa de expansión)** para Arduino que incluya lector de tarjeta **SD** y un **Reloj en Tiempo Real (RTC)**.
 * **Conexiones:** El pin TX del GPS va al pin 4 del Arduino, el RX al pin 3, VCC a 5V y GND a GND.
 
-## 3. El Código y las Librerías (Páginas 2 y 3)
+## 3. El Código y las Librerías.
 El documento incluye un programa (sketch) en C++ que requiere las librerías `TinyGPS` (para interpretar los datos del GPS) y `RTClib` (para la hora exacta).
 
 **¿Qué hace el código?**
@@ -224,7 +224,7 @@ El documento incluye un programa (sketch) en C++ que requiere las librerías `Ti
 4. Muestra las coordenadas en el Monitor Serie de Arduino.
 5. **Guarda los datos:** Escribe las coordenadas y la hora exacta en un archivo de texto llamado `gpsLOG.txt` dentro de la tarjeta SD.
 
-## 4. Resultados y Uso en el Mundo Real (Página 4)
+## 4. Resultados y Uso en el Mundo Real.
 * **El archivo final:** Muestra una captura de pantalla del archivo `gpsLOG.txt` abierto en un ordenador, con columnas de fecha, latitud, longitud y hora.
 * **Uso autónomo:** La última imagen muestra el proyecto montado sobre una batería de 6V, demostrando que se puede llevar el Arduino, el GPS y la batería en una mochila o vehículo para registrar rutas sin necesidad de un ordenador.
 * **Paciencia:** Al encenderlo, hay que esperar entre **40 y 120 segundos** (al aire libre) para que la luz del GPS empiece a parpadear y comience a registrar datos.
