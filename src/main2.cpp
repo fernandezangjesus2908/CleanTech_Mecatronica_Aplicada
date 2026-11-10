@@ -39,13 +39,34 @@ String Nombre_Wifi_Guardado = "";
 String Password_Wifi_Guardado = "";
 
 // Se configura la conexion Wifi estatica
-const char *ssid = "Mega-5G-7BAD";
-const char *password = "JUEtg4yu9C";
+constexpr char *Nombre_WIFI = "";
+constexpr char * = "";
 
-// Wifi Propio del sistema.
-//  const char *SSID = "INNOVATEC_FLOW_MIX";
-//  const char *PASSWORD = "PARTICIPANTE";
-//  const char *MDNS_NAME = "FLOW_MIX";
+//Comunicación del protocolo ESP-NOW
+
+uint8_t receptorMAC[] ={};
+esp_now_peer_info peerInfo;
+
+void Envio_De_Datos(const wifi_tx_info_t *tx_info, esp_now_send_status_t status){}
+
+void Configuracion_ESP_NOW(){
+    if(esp_now_init() != ESP_OK){
+        Serial.println("Ocurrio un error en el inicializado del ESP-NOW");
+        return;
+    }
+    esp_now_register_send_cb(Envio_De_Datos);
+    //Obtiene los datos de la MAC del esp-s3
+    memccpy(peerInfo.peer_addr, receptorMAC, 6);
+    //Peer es la conexion de datos remotos.
+    peerInfo.channel = 0;
+    peerInfo.encrypt = false;
+    if (esp_now_add_peer(&peerInfo)!= ESP_OK)
+    {
+        Serial.println("Fallo al obtener los datos PEER");
+        return;
+    }
+    Serial.println("El ESP-NOW Cargo exitosamente");
+}
 
 // Configuración del espnow para realizar la transferencia de datos esp32
 enum DIRECCION
@@ -118,7 +139,7 @@ void Guardar_Wifi()
         ;
     {
         webServer.send(400, , );
-        return
+        return;
     }
 
     preferences.begin("", false);

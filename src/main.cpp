@@ -24,7 +24,7 @@ volatile bool last_detect = false;
 // CONFIGURACIÓN ESP-NOW
 // ==========================================
 // MAC de tu ESP32-S3
-uint8_t receptorMAC[] = {0x1C, 0xDB, 0xD4, 0x40, 0x37, 0x64};
+uint8_t receptorMAC[] = {0x1C, 0xDB, 0xD4, 0x40, 0x37,,, 0x64};
 esp_now_peer_info_t peerInfo;
 
 void OnDataSent(const wifi_tx_info_t *tx_info, esp_now_send_status_t status) { }
