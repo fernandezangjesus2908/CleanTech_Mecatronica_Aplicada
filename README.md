@@ -62,7 +62,7 @@ El encoder genera dos señales digitales (A y B) desfasadas 90°. Esto permite m
 El JGA25-370 es una solución confiable para proyectos que requieren precisión y durabilidad. Su encoder permite una retroalimentación efectiva para sistemas PID y control digital, siendo ideal para aplicaciones educativas, de automatización o experimentales.
 
 - ### Puente-H BTS7960 IBT_2:
-![alt text](image-4.png)
+![alt text](img/image-4.png)
 
 El **BTS 7960** es un módulo de potencia diseñado para el control de motores de corriente continua (DC) que requieren mucha energía. Integra en un solo encapsulado un interruptor de alta potencia superior (MOSFET de canal P), un interruptor inferior (MOSFET de canal N) y su propio circuito de control (driver). Es ideal para construir puentes H o sistemas de control de motores en robótica y automoción.
 
@@ -96,7 +96,7 @@ El chip genera un "tiempo muerto" automático para asegurarse de que el interrup
 - Construcción de puentes H para inversión de giro.
 
 - ### XL4015 Convertidor DC-DC Buck Reductor (5A):
-![alt text](image.png)
+![alt text](img/image.png)
 
 El **XL4015** es un módulo integrado (chip) que funciona como un **convertidor reductor de voltaje DC a DC (Buck Converter)**. Su función principal es tomar una corriente continua de mayor voltaje (por ejemplo, de una batería de 12V o 24V) y convertirla de manera muy eficiente en un voltaje menor y estable (como 5V) para alimentar dispositivos electrónicos.
 
@@ -156,7 +156,7 @@ El documento advierte sobre varios detalles críticos que pueden arruinar tu pro
 * **El botón de encendido (CHIP_PU):** El pin **CHIP_PU** es el encargado de encender o resetear el chip. Para que funcione, debe recibir un voltaje alto (High). El datasheet muestra un gráfico de tiempo: hay que esperar al menos **50 microsegundos** después de que llegue la energía para activar este pin, de lo contrario el chip podría no arrancar correctamente.
 
 - ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
-![alt text](image-1.png)
+![alt text](img/image-1.png)
 
 ## ¿Qué es el BMI160?
 Es una **unidad de medición inercial (IMU) muy pequeña y de bajo consumo**. Combina en un solo chip:
@@ -198,7 +198,7 @@ El documento incluye un diagrama de los 14 pines visto desde abajo. Los pines in
 - Interfaz SPI secundaria para estabilización óptica.
 
 - ### Módulo GPS GY-NEO6MV2.
-![alt text](image-2.png) {width=50%}
+![alt text](img/image-2.png) {width=50%}
 ## 1. ¿Qué es y cómo funciona el módulo?
 * **Precisión:** Tiene una precisión horizontal de **2.5 metros** y una tasa de actualización de 1 vez por segundo (1Hz).
 * **Indicador LED:** 
