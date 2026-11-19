@@ -9,6 +9,9 @@ Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del si
 
 ## Actuadores del sistema:
 
+Los actuadores son los elementos del sistema que materializan las órdenes de control, transformando señales de mando en una acción física sobre el proceso o la carga. Actúan como interfaz entre el subsistema de control y el mundo físico: reciben una consigna, la interpretan y generan un movimiento, una fuerza, una variación de posición o una modificación del estado del sistema.
+
+De forma general, un actuador cumple tres funciones básicas: aceptar una señal de entrada, disponer de una fuente de energía que le permita realizar el trabajo y entregar una acción útil sobre el proceso. Su comportamiento se valora por aspectos como la precisión, la velocidad de respuesta, la repetibilidad, la fuerza o par disponible, el consumo energético, la robustez y la facilidad de integración con el resto del sistema.
 
 - # Motorreductor JGA25-370 12VDC 330RPM Con Encoder Integrado:
 
