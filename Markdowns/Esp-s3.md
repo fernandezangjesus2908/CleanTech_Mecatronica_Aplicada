@@ -1,4 +1,4 @@
-### ESP32-S3-DevKitC-1:
+- ### ESP32-S3-DevKitC-1:
 
 ## 1. Distribución y "Multiplexación" de Pines.
 El chip tiene **56 pines** distribuidos en un encapsulado cuadrado. Algo muy importante es que el ESP32-S3 usa **"multiplexación"**. 

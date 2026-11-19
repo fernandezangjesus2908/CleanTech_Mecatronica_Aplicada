@@ -7,8 +7,11 @@ Dentro del desglose de los parametros tomados en cuenta en el desarrrollo del si
 
 ## Componentes utilizados dentro de la construcción del sistema cleanTECH:
 
-- ### Motorreductor JGA25-370 12VDC 330RPM Con Encoder Integrado:
-<img width="33%" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
+## Actuadores del sistema:
+
+
+- # Motorreductor JGA25-370 12VDC 330RPM Con Encoder Integrado:
+
 
 El **JGA25-370** es un motorreductor de corriente continua (12V) que incluye un **encoder incremental** para medir con precisión la velocidad y la posición del giro. Sus engranajes metálicos lo hacen resistente y duradero, y su encoder permite conectarlo a microcontroladores como Arduino, ESP32, PIC o Raspberry Pi para sistemas de control realimentado (PID). Es ideal para robótica, automatización y proyectos educativos avanzados.
 
@@ -61,7 +64,82 @@ El encoder genera dos señales digitales (A y B) desfasadas 90°. Esto permite m
 ## Observaciones finales
 El JGA25-370 es una solución confiable para proyectos que requieren precisión y durabilidad. Su encoder permite una retroalimentación efectiva para sistemas PID y control digital, siendo ideal para aplicaciones educativas, de automatización o experimentales.
 
-- ### Puente-H BTS7960 IBT_2:
+- # Motor Reductor DC 12V 200RPM 5840-31ZY (Engranaje Helicoidal / Gusano)
+
+![alt text](image.png)
+
+El **5840-31ZY** es un motorreductor de corriente continua de 12 V con caja de engranajes tipo helicoidal (tornillo sinfín / worm gear). Destaca por su diseño compacto de eje de salida perpendicular al motor, alto par y función **autoblocante**: cuando se corta la alimentación, el eje de salida permanece fijo y no retrocede por la carga. Es una opción robusta y silenciosa para automatización, mecanismos de posicionamiento y proyectos que requieren fuerza en poco espacio.
+
+## Características principales
+- **Modelo:** 5840-31ZY (versión 12 V / ≈200 RPM)
+- **Voltaje nominal:** 12 VDC (rango típico de trabajo 6-18 V)
+- **Velocidad sin carga:** ≈260 RPM  
+- **Velocidad nominal (con carga):** ≈200 RPM  
+- **Torque nominal:** ≈5 kg·cm  
+- **Torque máximo (bloqueo):** ≈25 kg·cm  
+- **Corriente sin carga:** ≤ 0,3 A  
+- **Corriente nominal:** ≤ 1,6 A  
+- **Corriente de bloqueo:** ≈ 6,5 A  
+- **Potencia nominal:** ≈ 20-21 W  
+- **Relación de reducción típica:** 31:1 (para la versión de 200 RPM)
+- **Tipo de engranaje:** Helicoidal / tornillo sinfín metálico (alta resistencia y autobloqueo)
+- **Eje de salida:** 8 mm tipo D (puede ser simple o doble según variante)
+- **Dimensiones aproximadas:** Cuerpo compacto (alrededor de 58 × 40 × 115 mm según configuración)
+- **Peso:** ≈ 350-365 g
+- **Sentido de giro:** Reversible (CW/CCW) invirtiendo la polaridad
+- **Ruido:** Bajo a moderado
+
+## Funcionamiento del engranaje helicoidal
+El sistema de tornillo sinfín transmite el movimiento de forma perpendicular y genera un alto par de reducción. Su característica más útil es el **autobloqueo**: sin corriente el eje no se mueve aunque haya carga, lo que evita la necesidad de frenos adicionales en muchas aplicaciones. Se controla fácilmente con drivers de potencia (L298N, BTS7960, TB6612, etc.) y es compatible con Arduino, ESP32 u otros microcontroladores.
+
+## Curvas de rendimiento típicas (a 12 V – referencia serie 5840-31ZY)
+
+| Relación | Velocidad sin carga (RPM) | Velocidad nominal (RPM) | Torque nominal (kg·cm) | Torque de bloqueo (kg·cm) |
+|----------|---------------------------|--------------------------|------------------------|---------------------------|
+| 17:1     | 470                       | 380                      | 2,7                    | 13,5                      |
+| **31:1** | **260**                   | **200**                  | **5**                  | **25**                    |
+| 49:1     | 160                       | 130                      | 8                      | 40                        |
+| 100:1    | 80                        | 60                       | 16                     | 70                        |
+
+
+## Aplicaciones comunes
+- Cortinas y persianas motorizadas
+- Mecanismos de apertura y cierre (puertas, trampillas, cajones)
+- Brazos robóticos y posicionadores
+- Automatización de vending, dispensadores y equipos de oficina
+- Sistemas de elevación ligera y plataformas
+- Proyectos de robótica y automatización doméstica/industrial ligera
+
+## Ventajas
+- Alto par en un formato muy compacto gracias al engranaje de tornillo sinfín
+- Función autoblocante (no necesita freno adicional en muchas aplicaciones)
+- Construcción metálica resistente
+- Bajo nivel de ruido y funcionamiento estable
+- Fácil control de sentido y velocidad
+- Buena relación calidad-precio para proyectos de medio-alto torque
+
+## Recomendaciones de uso
+- No superar los 12-14 V de forma continua.
+- Usar un driver con capacidad suficiente (mínimo 2-3 A continuos y picos de 6-7 A).
+- Verificar la polaridad antes de conectar (rojo/negro según sentido deseado).
+- Fijar firmemente el motor para evitar vibraciones.
+- En aplicaciones de carga elevada o continua, considerar ventilación o ciclos de trabajo.
+- Evitar el bloqueo prolongado para no dañar el motor o la caja de engranajes.
+
+## Observaciones finales
+El **Motor Reductor DC 12V 200RPM 5840-31ZY** es una solución muy práctica cuando se necesita un buen par, autobloqueo y un diseño compacto de eje a 90°. Ideal para automatización, mecanismos de movimiento y proyectos de robótica que requieren fiabilidad y fuerza en espacios reducidos.
+
+# Componentes de potencia:
+
+Los componentes de potencia forman una familia de dispositivos y módulos diseñados para gestionar, convertir y controlar energía eléctrica en aplicaciones donde circulan tensiones, corrientes y potencias relativamente elevadas. Su función principal no es procesar información, sino actuar como intermediarios eficientes entre una fuente de energía y una carga.
+
+En términos generales, estos componentes permiten regular el flujo de energía, adaptar niveles eléctricos, mejorar la calidad de la alimentación y facilitar el funcionamiento seguro de sistemas eléctricos y electrónicos. Su desempeño se evalúa considerando aspectos como la eficiencia, las pérdidas, la capacidad de disipar calor, la robustez, la fiabilidad y la integración con otros elementos del sistema.
+
+Su uso es común en sectores como la industria, el transporte, la generación y distribución de energía, los sistemas de alimentación y muchas aplicaciones de automatización. Más que un único tipo de dispositivo, los componentes de potencia representan un conjunto amplio de soluciones tecnológicas cuyo diseño y selección dependen de las condiciones eléctricas, térmicas y ambientales de cada aplicación.
+
+
+- # Puente-H BTS7960 IBT_2:
+
 ![alt text](img/image-4.png)
 
 El **BTS 7960** es un módulo de potencia diseñado para el control de motores de corriente continua (DC) que requieren mucha energía. Integra en un solo encapsulado un interruptor de alta potencia superior (MOSFET de canal P), un interruptor inferior (MOSFET de canal N) y su propio circuito de control (driver). Es ideal para construir puentes H o sistemas de control de motores en robótica y automoción.
@@ -95,7 +173,7 @@ El chip genera un "tiempo muerto" automático para asegurarse de que el interrup
 - Control de motores en impresoras 3D o máquinas CNC.
 - Construcción de puentes H para inversión de giro.
 
-- ### XL4015 Convertidor DC-DC Buck Reductor (5A):
+- # XL4015 Convertidor DC-DC Buck Reductor (5A):
 ![alt text](img/image.png)
 
 El **XL4015** es un módulo integrado (chip) que funciona como un **convertidor reductor de voltaje DC a DC (Buck Converter)**. Su función principal es tomar una corriente continua de mayor voltaje (por ejemplo, de una batería de 12V o 24V) y convertirla de manera muy eficiente en un voltaje menor y estable (como 5V) para alimentar dispositivos electrónicos.
@@ -132,7 +210,9 @@ Para evitar que el chip o tus dispositivos se dañen, el XL4015 incluye de fábr
 - Equipos de telecomunicaciones y redes.
 - Cualquier proyecto de electrónica o robótica que necesite bajar el voltaje de una batería de forma eficiente sin generar mucho calor (a diferencia de los reguladores lineales tradicionales).
 
-### ESP32-S3-DevKitC-1:
+# Microontroladores.
+
+- # ESP32-S3-DevKitC-1:
 
 ## 1. Distribución y "Multiplexación" de Pines.
 El chip tiene **56 pines** distribuidos en un encapsulado cuadrado. Algo muy importante es que el ESP32-S3 usa **"multiplexación"**. 
@@ -155,7 +235,19 @@ El documento advierte sobre varios detalles críticos que pueden arruinar tu pro
 * **Voltajes:** El chip no usa un solo voltaje. Tiene reguladores internos que convierten la energía para diferentes partes: 1.1V para el procesador digital, 1.1V para el reloj de tiempo real (RTC) y 1.8V para la memoria flash.
 * **El botón de encendido (CHIP_PU):** El pin **CHIP_PU** es el encargado de encender o resetear el chip. Para que funcione, debe recibir un voltaje alto (High). El datasheet muestra un gráfico de tiempo: hay que esperar al menos **50 microsegundos** después de que llegue la energía para activar este pin, de lo contrario el chip podría no arrancar correctamente.
 
-- ### BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
+# Componentes Sensoriales.
+
+Los componentes sensoriales son dispositivos fundamentales en la tecnología moderna. Su función principal consiste en detectar y medir magnitudes físicas o químicas del entorno —como temperatura, presión, movimiento, luz o presencia de sustancias— y convertir esa información en señales que pueden ser interpretadas por sistemas electrónicos o digitales.
+
+Actúan como el “punto de contacto” entre el mundo físico y los sistemas de control, monitoreo o automatización. Gracias a ellos es posible recopilar datos del entorno de forma continua y precisa, lo que permite tomar decisiones, activar procesos o generar alertas de manera automática.
+
+En la actualidad, los sensores están presentes en prácticamente todos los ámbitos: desde la industria y la medicina hasta los dispositivos de uso cotidiano. Su capacidad para transformar fenómenos del mundo real en información útil los convierte en una pieza clave de la digitalización y de la Internet de las Cosas.
+
+-	# Encoder (GM 25-370) para JGA25-370:
+
+<img width="33%" alt="imagen_2025-09-23_134925293-a82afac2cb254dbe3417586605672271-1024-1024" src="https://github.com/user-attachments/assets/c5fa8177-a76b-410c-856d-26f6f07c72a0" />
+
+- # BMI160 Sensor Giroscopio y Acelerómetro De 6DOF.
 ![alt text](img/image-1.png)
 
 ## ¿Qué es el BMI160?

@@ -1,4 +1,4 @@
-XL4015 Convertidor DC-DC Buck Reductor (5A):
+- ### XL4015 Convertidor DC-DC Buck Reductor (5A):
 ![alt text](img/image.png)
 
 El **XL4015** es un módulo integrado (chip) que funciona como un **convertidor reductor de voltaje DC a DC (Buck Converter)**. Su función principal es tomar una corriente continua de mayor voltaje (por ejemplo, de una batería de 12V o 24V) y convertirla de manera muy eficiente en un voltaje menor y estable (como 5V) para alimentar dispositivos electrónicos.
