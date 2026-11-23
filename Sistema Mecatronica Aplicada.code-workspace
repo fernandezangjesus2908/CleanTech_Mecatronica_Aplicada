@@ -5,34 +5,24 @@
 			"path": "../Sistema Mecatronica Aplicada"
 		},
 		{
-			"name": "Proyecto_Incubadora",
-			"path": "../Proyecto_Incubadora"
-		},
-		{
 			"name": "Sistema de camara Mecatronica aplicada",
 			"path": "."
 		},
 		{
-			"path": "../../../Pagina de Doki Doki Physics Club"
+			"path": "../SADI-PID"
 		},
 		{
-			"path": "../../../Semestre 9no/Femeci"
+			"path": "../Smart-Allen"
 		},
 		{
-			"path": "../../../Semestre 8vo/PlatformIO/Projects/Innovatec"
+			"path": "../../../../Descargas/Esp32-s3-Parte_Final_SionoRaza"
 		},
 		{
-			"path": "../../../Semestre 8vo/PlatformIO/Projects/Sistema de temperatura telegram"
-		},
-		{
-			"path": "../../../Semestre 8vo/PlatformIO/Projects/Sistema para robobatalla"
-		},
-		{
-			"path": "../SADI-PID/Proyecto_Incubadora"
+			"path": "../../../../Descargas/Sistema de simulacion mecanica(1)"
 		}
 	],
 	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "Sistema de camara Mecatronica aplicada",
+		"liveServer.settings.multiRootWorkspaceName": "SADI-PID",
 		"dotnet.defaultSolution": "Pagina de Doki Doki Physics Club/Juego_GODOT/ddpc---doki-doki-fangame/DDPC - Doki Doki Fangame.sln"
 	}
 }

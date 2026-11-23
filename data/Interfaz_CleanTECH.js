@@ -31,7 +31,7 @@
     let fpsInterval = null;
     let lastFpsTime = 0;
     let lastFrame = null;
-    let drawInterval = null; // Intervalo para el Canvas
+    let drawInterval = null; 
 
     const enc = new TextEncoder();
     const HDR_SEP = enc.encode('\r\n\r\n');
@@ -62,7 +62,6 @@
                 const res = await fetch('/coords', { cache: 'no-store' });
                 const data = await res.json();
                 
-                // Sincronizar el tamaño del canvas con la imagen
                 if (canvasEl.width !== streamEl.clientWidth || canvasEl.height !== streamEl.clientHeight) {
                     canvasEl.width = streamEl.clientWidth;
                     canvasEl.height = streamEl.clientHeight;
@@ -72,29 +71,26 @@
                 ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
                 if (data.detectado) {
-                    // Convertir coordenadas relativas (0 a 1) a píxeles reales
                     const px = data.x * canvasEl.width;
                     const py = data.y * canvasEl.height;
 
-                    // Dibujar un círculo de mira
                     ctx.beginPath();
                     ctx.arc(px, py, 12, 0, 2 * Math.PI);
-                    ctx.strokeStyle = '#00FF00'; // Verde brillante
+                    ctx.strokeStyle = '#00FF00'; 
                     ctx.lineWidth = 3;
                     ctx.stroke();
 
-                    // Dibujar cruz central
                     ctx.beginPath();
                     ctx.moveTo(px - 15, py); ctx.lineTo(px + 15, py);
                     ctx.moveTo(px, py - 15); ctx.lineTo(px, py + 15);
-                    ctx.strokeStyle = '#FF0000'; // Rojo
+                    ctx.strokeStyle = '#FF0000'; 
                     ctx.lineWidth = 2;
                     ctx.stroke();
                 }
             } catch (err) {
-                // Ignorar errores de fetch (la cámara puede estar ocupada)
+                // Ignorar
             }
-        }, 200); // Se actualiza 5 veces por segundo
+        }, 100); // [OPT] Actualizado a 10 FPS (antes 200ms)
     }
 
     function updateUI() {
@@ -159,24 +155,29 @@
         infoFps.textContent = '0.0 FPS';
     }
 
+    // [OPT] Manejo de memoria optimizado para evitar lag del navegador
     function displayFrame(jpegBytes) {
-        if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+        if (currentBlobUrl) {
+            URL.revokeObjectURL(currentBlobUrl); // Libera la RAM inmediatamente
+        }
         const blob = new Blob([new Uint8Array(jpegBytes)], { type: 'image/jpeg' });
         currentBlobUrl = URL.createObjectURL(blob);
         streamEl.src = currentBlobUrl;
         frameCount++;
-        lastFrame = { bytes: jpegBytes };
         
-        streamEl.onload = () => {
-            if (!lastFrame || lastFrame.w) return;
-            const w = streamEl.naturalWidth;
-            const h = streamEl.naturalHeight;
-            lastFrame.w = w;
-            lastFrame.h = h;
-            valSize.textContent = w + ' × ' + h;
-            valRes.textContent = w + '×' + h;
-            infoRes.textContent = w + '×' + h;
-        };
+        if (!lastFrame || !lastFrame.w) {
+            streamEl.onload = () => {
+                if (!lastFrame) return;
+                const w = streamEl.naturalWidth;
+                const h = streamEl.naturalHeight;
+                lastFrame = { w: w, h: h };
+                valSize.textContent = w + ' × ' + h;
+                valRes.textContent = w + '×' + h;
+                infoRes.textContent = w + '×' + h;
+                streamEl.onload = null; // Limpiar evento
+            };
+        }
+        lastFrame = lastFrame || { bytes: jpegBytes };
     }
 
     async function connect() {
@@ -188,7 +189,6 @@
             await runMjpegStream(abortCtrl.signal);
         } catch (err) {
             if (err.name !== 'AbortError') {
-                console.error('[CleanTECH Camera] stream error:', err);
                 disconnect();
             }
         }
@@ -246,7 +246,7 @@
                 state = 'streaming';
                 updateUI();
                 startFpsCounter();
-                startDrawing(); // <--- INICIAMOS EL DIBUJADO AQUÍ
+                startDrawing(); 
             }
         }
     }
