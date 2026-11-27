@@ -12,10 +12,10 @@
 #include <CleanTECH_-_Vision_inferencing.h>
 
 // ==========================================
-// CONFIGURACIÓN DE RED (Modo Estación - STA)
+// CONFIGURACIÓN DE RED
 // ==========================================
 const char *ssid     = "CleanTECH_Robot";
-const char *password = "";   // Sin contraseña (el robot no tiene)
+const char *password = "cleantech2611"; 
 
 httpd_handle_t camera_httpd = NULL;
 
@@ -39,10 +39,34 @@ volatile bool  last_detect = false;
 portMUX_TYPE coordsMux = portMUX_INITIALIZER_UNLOCKED;
 
 // ==========================================
-// CONFIGURACIÓN ESP-NOW (BROADCAST)
+// PROTOCOLO DE ACCESO EXCLUSIVO A CÁMARA
 // ==========================================
-// Broadcast: le llega a cualquier robot en el canal 1
-uint8_t receptorMAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; 
+SemaphoreHandle_t camMutex = NULL;
+
+const uint32_t CAM_GRAB_VISION_MS  = 500;   // Visión tolera que el stream esté enviando
+const uint32_t CAM_GRAB_STREAM_MS  = 100;   // El stream salta el frame si no consigue
+const uint32_t CAM_RETRY_DELAY_MS  = 100;
+const int      CAM_WARMUP_FRAMES   = 5;
+
+static camera_fb_t* cam_grab(uint32_t timeout_ms) {
+    if (!camMutex) return NULL;
+    if (xSemaphoreTake(camMutex, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) return NULL;
+    camera_fb_t *fb = esp_camera_fb_get();
+    if (!fb) { xSemaphoreGive(camMutex); return NULL; }
+    return fb;
+}
+
+static void cam_release(camera_fb_t *fb) {
+    if (!fb) return;
+    esp_camera_fb_return(fb);
+    if (camMutex) xSemaphoreGive(camMutex);
+}
+
+// ==========================================
+// CONFIGURACIÓN ESP-NOW (UNICAST AL ESP32-S3)
+// ==========================================
+// MAC STA del ESP32-S3 receptor
+uint8_t receptorMAC[] = {0x1C, 0xDB, 0xD4, 0x40, 0x37, 0x64}; 
 esp_now_peer_info_t peerInfo;
 
 struct __attribute__((packed)) PaqueteVision {
@@ -50,6 +74,8 @@ struct __attribute__((packed)) PaqueteVision {
     uint8_t activar;   
     uint8_t clase;     
     uint8_t seq;       
+    uint8_t dinamico;   // 1 = objeto dinámico en este frame
+    uint8_t clase_din;  // clase del dinámico
 };
 uint8_t seq_paquete = 0;
 
@@ -69,6 +95,8 @@ uint32_t diag_pkt_off        = 0;
 volatile uint32_t diag_tx_ok    = 0;
 volatile uint32_t diag_tx_fail  = 0;
 volatile uint32_t diag_send_err = 0;
+uint32_t diag_cam_fail       = 0;   
+uint32_t diag_stream_skip    = 0;   
 unsigned long lastStatusMs     = 0;
 
 // ==========================================
@@ -94,13 +122,11 @@ const uint32_t VISION_PERIODO_MS = 150;
 const bool CROP_CENTRAL = true;
 
 // ==========================================
-// FILTROS DE MOVIMIENTO DINÁMICO
+// FILTROS DE MOVIMIENTO DINÁMICO (BALANCEADOS)
 // ==========================================
 const int   MOTION_PIXEL_THRESHOLD = 25;
-// Umbral de píxeles (35%): Si más del 35% de la caja cambia, es dinámico
-const float MAX_MOTION_RATIO       = 0.35f;   
-// Umbral de velocidad (0.15): Si el centro salta >15% de pantalla en 150ms, es dinámico
-const float MAX_BBOX_SPEED         = 0.15f;   
+const float MAX_MOTION_RATIO       = 0.85f;
+const float MAX_BBOX_SPEED         = 0.45f;
 
 // ==========================================
 // CALLBACK ESP-NOW
@@ -233,6 +259,9 @@ void registrarCalibracion(const bool visto[], const float conf[], const float ar
     portEXIT_CRITICAL(&statsMux);
 }
 
+// ==========================================
+// ESP-NOW — usa el MISMO canal que el AP
+// ==========================================
 void setup_espnow() {
     if (esp_now_init() != ESP_OK) {
         Serial.println("Error inicializando ESP-NOW");
@@ -240,13 +269,16 @@ void setup_espnow() {
     }
     esp_now_register_send_cb(OnDataSent);
     memcpy(peerInfo.peer_addr, receptorMAC, 6);
-    peerInfo.channel = 1; // FORZAR CANAL 1
+    peerInfo.channel = 0; // 0 = auto (sincronizado con el AP)
     peerInfo.encrypt = false;
     if (esp_now_add_peer(&peerInfo) != ESP_OK) {
         Serial.println("Fallo al añadir peer ESP-NOW");
         return;
     }
-    Serial.printf("ESP-NOW Inicializado (canal peer = %d)\n", peerInfo.channel);
+    Serial.printf("ESP-NOW OK. Peer=%02X:%02X:%02X:%02X:%02X:%02X canal=%d (AP=%d)\n",
+        receptorMAC[0], receptorMAC[1], receptorMAC[2],
+        receptorMAC[3], receptorMAC[4], receptorMAC[5],
+        peerInfo.channel, WiFi.channel());
 }
 
 // ==========================================
@@ -400,6 +432,9 @@ static esp_err_t index_handler(httpd_req_t *req) { return send_file(req, "/Inter
 static esp_err_t css_handler(httpd_req_t *req)   { return send_file(req, "/Interfaz_CleanTECH.css", "text/css"); }
 static esp_err_t js_handler(httpd_req_t *req)    { return send_file(req, "/Interfaz_CleanTECH.js", "application/javascript"); }
 
+// ==========================================
+// STREAM HANDLER (Con protocolo de mutex)
+// ==========================================
 static esp_err_t stream_handler(httpd_req_t *req) {
     camera_fb_t *fb = NULL;
     esp_err_t res = ESP_OK;
@@ -409,16 +444,24 @@ static esp_err_t stream_handler(httpd_req_t *req) {
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
 
     while (true) {
-        fb = esp_camera_fb_get();
-        if (!fb) return ESP_FAIL;
+        fb = cam_grab(CAM_GRAB_STREAM_MS);
+        if (!fb) {
+            // La IA está usando la cámara, saltamos este frame
+            diag_stream_skip++;
+            vTaskDelay(pdMS_TO_TICKS(50));
+            continue;
+        }
+
         size_t jpg_LEN = fb->len;
         size_t hlen = snprintf(part_buf, 128, "\r\n--123456789000000000000987654321\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n", jpg_LEN);
         res = httpd_resp_send_chunk(req, part_buf, hlen);
         if (res == ESP_OK) res = httpd_resp_send_chunk(req, (const char *)fb->buf, jpg_LEN);
         if (res == ESP_OK) res = httpd_resp_send_chunk(req, "\r\n", 2);
-        esp_camera_fb_return(fb);
-        if (res != ESP_OK) break;
         
+        cam_release(fb);
+        fb = NULL;
+
+        if (res != ESP_OK) break;
         vTaskDelay(pdMS_TO_TICKS(80)); 
     }
     return res;
@@ -477,245 +520,221 @@ void vision_task(void *pvParameters) {
     }
     memset(prev_gray_buffer, 0, ei_len); 
 
+    // Warmup
+    for (int i = 0; i < CAM_WARMUP_FRAMES; i++) {
+        camera_fb_t *w = cam_grab(1000);
+        if (w) { Serial.printf("[VISION] warmup %d OK len=%u\n", i, w->len); cam_release(w); }
+        else   { Serial.printf("[VISION] warmup %d FALLO\n", i); }
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+
     int      framesSinDeteccion = 0;
     bool     motorActivo        = false;
     uint8_t  claseFinal         = 255;
     bool     last_envio         = false;
 
-    // Variables para rastrear el centro del objeto en el frame anterior
     float prev_frame_cx = -1.0;
     float prev_frame_cy = -1.0;
 
     while (1) {
-        camera_fb_t *fb = esp_camera_fb_get();
+        // --- PASO 1: Capturar frame con Mutex ---
+        camera_fb_t *fb = cam_grab(CAM_GRAB_VISION_MS);
         if (!fb) {
-            Serial.println("[VISION] Aviso: cámara ocupada. Reintentando...");
-            vTaskDelay(pdMS_TO_TICKS(100));
+            diag_cam_fail++;
+            if (diag_cam_fail % 10 == 1) {
+                Serial.printf("[VISION] Cámara ocupada (cam_fail=%u). Reintentando...\n", diag_cam_fail);
+            }
+            vTaskDelay(pdMS_TO_TICKS(CAM_RETRY_DELAY_MS));
             continue;
         }
 
         if (rgb_buffer == NULL) {
             rgb_buffer = (uint8_t*)ps_malloc(fb->width * fb->height * 3);
             if (rgb_buffer == NULL) {
-                esp_camera_fb_return(fb);
+                cam_release(fb);
                 vTaskDelay(pdMS_TO_TICKS(100));
                 continue;
             }
         }
 
-        if (fmt2rgb888(fb->buf, fb->len, fb->format, rgb_buffer)) {
-            const int W = EI_CLASSIFIER_INPUT_WIDTH;
-            const int H = EI_CLASSIFIER_INPUT_HEIGHT;
-            const int fbW = (int)fb->width;
-            const int fbH = (int)fb->height;
+        // --- PASO 2: Convertir y guardar dimensiones ---
+        bool converted = fmt2rgb888(fb->buf, fb->len, fb->format, rgb_buffer);
+        int fbW = fb->width;
+        int fbH = fb->height;
 
-            int src_w = fbW, src_h = fbH, off_x = 0, off_y = 0;
-            if (CROP_CENTRAL) {
-                int lado = (fbW < fbH) ? fbW : fbH;
-                src_w = lado; src_h = lado;
-                off_x = (fbW - lado) / 2;
-                off_y = (fbH - lado) / 2;
+        // --- PASO 3: LIBERAR CÁMARA antes de la inferencia ---
+        cam_release(fb);
+        fb = NULL;
+
+        if (!converted) {
+            Serial.println("Error convirtiendo JPEG a RGB");
+            vTaskDelay(pdMS_TO_TICKS(VISION_PERIODO_MS));
+            continue;
+        }
+
+        // --- PASO 4: Procesamiento (Grises) ---
+        const int W = EI_CLASSIFIER_INPUT_WIDTH;
+        const int H = EI_CLASSIFIER_INPUT_HEIGHT;
+        int src_w = fbW, src_h = fbH, off_x = 0, off_y = 0;
+        if (CROP_CENTRAL) {
+            int lado = (fbW < fbH) ? fbW : fbH;
+            src_w = lado; src_h = lado;
+            off_x = (fbW - lado) / 2;
+            off_y = (fbH - lado) / 2;
+        }
+
+        for (int i = 0; i < H; i++) {
+            for (int j = 0; j < W; j++) {
+                int x2 = off_x + (j * src_w) / W;
+                int y2 = off_y + (i * src_h) / H;
+                int pixel_idx = (y2 * fbW + x2) * 3;
+                uint8_t r = rgb_buffer[pixel_idx];
+                uint8_t g = rgb_buffer[pixel_idx + 1];
+                uint8_t b = rgb_buffer[pixel_idx + 2];
+                ei_buffer[i * W + j] = (uint8_t)((r * 77 + g * 150 + b * 29) >> 8);
+            }
+        }
+
+        // --- PASO 5: Inferencia ---
+        signal_t signal;
+        signal.total_length = ei_len;
+        signal.get_data = &get_signal_data;
+
+        ei_impulse_result_t result = { 0 };
+        EI_IMPULSE_ERROR res = run_classifier(&signal, &result, false);
+
+        if (res == EI_IMPULSE_OK) {
+            diag_frames++;
+            bool positivo = false;
+            bool visto[NUM_CLASES] = {false};
+            float cmax[NUM_CLASES] = {0};
+            float amax[NUM_CLASES] = {0};
+            float mejor = 0.0;
+            float current_best_cx = -1.0;
+            float current_best_cy = -1.0;
+            uint8_t claseDet = 255;
+            bool dinamico_detectado = false;
+            uint8_t clase_dinamica_idx = 255;
+
+            for (size_t ix = 0; ix < result.bounding_boxes_count; ix++) {
+                auto bb = result.bounding_boxes[ix];
+                if (bb.value == 0) continue;
+                diag_det_raw++;
+
+                int idx = buscarClase(bb.label); 
+                if (idx < 0) { diag_desc_label++; DBG_BOX("  [X] Descartada: Etiqueta desconocida '%s'\n", bb.label); continue; }
+                if (!CLASES[idx].activa) { diag_desc_inactiva++; DBG_BOX("  [X] Descartada: Clase '%s' inactiva\n", CLASES[idx].etiqueta); continue; }
+                if (bb.value < umbral_rt[idx]) { diag_desc_conf++; DBG_BOX("  [X] Descartada [%s]: Confianza %.2f < Umbral %.2f\n", CLASES[idx].etiqueta, bb.value, umbral_rt[idx]); continue; }
+
+                float area = (float)bb.width * (float)bb.height;
+                if (bb.value > cmax[idx]) { visto[idx] = true; cmax[idx] = bb.value; amax[idx] = area; }
+                if (area < area_rt[idx]) { diag_desc_area++; DBG_BOX("  [X] Descartada [%s]: Área %.0f < Mínima %.0f\n", CLASES[idx].etiqueta, area, area_rt[idx]); continue; }
+
+                // --- FILTRO 1: PIXELES EN MOVIMIENTO ---
+                bool es_dinamico_pixeles = false;
+                if (prev_gray_buffer != NULL) {
+                    int moving_pixels = 0; int total_pixels = 0;
+                    int start_x = max(0, (int)bb.x); int end_x = min(W, (int)(bb.x + bb.width));
+                    int start_y = max(0, (int)bb.y); int end_y = min(H, (int)(bb.y + bb.height));
+                    for (int y = start_y; y < end_y; y++) {
+                        int row_offset = y * W;
+                        for (int x = start_x; x < end_x; x++) {
+                            int pixel_idx = row_offset + x;
+                            int diff = abs((int)ei_buffer[pixel_idx] - (int)prev_gray_buffer[pixel_idx]);
+                            if (diff > MOTION_PIXEL_THRESHOLD) moving_pixels++;
+                            total_pixels++;
+                        }
+                    }
+                    if (total_pixels > 0) {
+                        float motion_ratio = (float)moving_pixels / (float)total_pixels;
+                        if (motion_ratio > MAX_MOTION_RATIO) { es_dinamico_pixeles = true; diag_desc_motion++; }
+                    }
+                }
+                if (es_dinamico_pixeles) {
+                    DBG_BOX("  [X] Descartada [%s]: Movimiento de píxeles detectado.\n", CLASES[idx].etiqueta);
+                    if (!dinamico_detectado) { dinamico_detectado = true; clase_dinamica_idx = (uint8_t)idx; }
+                    continue; 
+                }
+
+                float temp_cx = (off_x + (bb.x + bb.width / 2.0f) * src_w / (float)W) / (float)fbW;
+                float temp_cy = (off_y + (bb.y + bb.height / 2.0f) * src_h / (float)H) / (float)fbH;
+                
+                // --- FILTRO 2: VELOCIDAD DE LA CAJA ---
+                if (prev_frame_cx != -1.0 && prev_frame_cy != -1.0) {
+                    float dx = temp_cx - prev_frame_cx;
+                    float dy = temp_cy - prev_frame_cy;
+                    float velocidad = sqrt((dx * dx) + (dy * dy));
+                    if (velocidad > MAX_BBOX_SPEED) { 
+                        diag_desc_motion++; 
+                        DBG_BOX("  [X] Descartada [%s]: Velocidad alta (%.2f > %.2f)\n", CLASES[idx].etiqueta, velocidad, MAX_BBOX_SPEED);
+                        if (!dinamico_detectado) { dinamico_detectado = true; clase_dinamica_idx = (uint8_t)idx; }
+                        continue; 
+                    }
+                }
+
+                if (bb.value > mejor) {
+                    mejor = bb.value; positivo = true; claseDet = (uint8_t)idx;
+                    current_best_cx = temp_cx; current_best_cy = temp_cy;
+                    Serial.printf("  [✓] DETECCIÓN VÁLIDA: %s (Conf: %.2f)\n", CLASES[idx].etiqueta, bb.value);
+                }
+            }
+            
+            if (positivo) { prev_frame_cx = current_best_cx; prev_frame_cy = current_best_cy; diag_pos_frame++; }
+            registrarCalibracion(visto, cmax, amax);
+
+            if (positivo) { framesSinDeteccion = 0; motorActivo = true; claseFinal = claseDet; }
+            else { if (framesSinDeteccion < FRAMES_APAGAR) framesSinDeteccion++; if (framesSinDeteccion >= FRAMES_APAGAR) motorActivo = false; }
+            bool activar = motorActivo;
+
+            portENTER_CRITICAL(&coordsMux);
+            last_detect = activar;
+            if (positivo) { 
+                if (last_x == 0.0 && last_y == 0.0) { last_x = current_best_cx; last_y = current_best_cy; }
+                else { last_x = (last_x * 0.70f) + (current_best_cx * 0.30f); last_y = (last_y * 0.70f) + (current_best_cy * 0.30f); }
+            }
+            portEXIT_CRITICAL(&coordsMux);
+
+            bool enviar = activar && (calib_modo == CALIB_OFF); 
+
+            Serial.printf("  [WIN] pos=%d sinDet=%d/%d activar=%d enviar=%d modo=%d clase=%d conf=%.2f din=%d\n",
+                          positivo ? 1 : 0, framesSinDeteccion, FRAMES_APAGAR,
+                          activar ? 1 : 0, enviar ? 1 : 0, (int)calib_modo,
+                          (int)claseFinal, mejor, dinamico_detectado ? 1 : 0);
+
+            if (enviar != last_envio) {
+                if (enviar) diag_pkt_on++; else diag_pkt_off++;
+                Serial.printf("  [ESP-NOW TX] %s (Clase: %s, Seq: %u)\n", 
+                              enviar ? "ON" : "OFF", 
+                              (enviar && claseFinal < NUM_CLASES) ? CLASES[claseFinal].etiqueta : "-", seq_paquete);
+                last_envio = enviar;
             }
 
-            for (int i = 0; i < H; i++) {
-                for (int j = 0; j < W; j++) {
-                    int x2 = off_x + (j * src_w) / W;
-                    int y2 = off_y + (i * src_h) / H;
-                    int pixel_idx = (y2 * fbW + x2) * 3;
-                    uint8_t r = rgb_buffer[pixel_idx];
-                    uint8_t g = rgb_buffer[pixel_idx + 1];
-                    uint8_t b = rgb_buffer[pixel_idx + 2];
-                    ei_buffer[i * W + j] = (uint8_t)((r * 77 + g * 150 + b * 29) >> 8);
-                }
-            }
+            PaqueteVision pkt;
+            pkt.magic     = 0xCE;
+            pkt.activar   = enviar ? 1 : 0;
+            pkt.clase     = enviar ? claseFinal : 255;
+            pkt.seq       = seq_paquete++;
+            pkt.dinamico  = dinamico_detectado ? 1 : 0;
+            pkt.clase_din = dinamico_detectado ? clase_dinamica_idx : 255;
 
-            signal_t signal;
-            signal.total_length = ei_len;
-            signal.get_data = &get_signal_data;
+            if (dinamico_detectado) { Serial.printf("  [DIN] Objeto dinámico (idx %u)\n", clase_dinamica_idx); }
+            
+            esp_err_t err = esp_now_send(receptorMAC, (uint8_t*)&pkt, sizeof(pkt));
+            if (err != ESP_OK) { diag_send_err++; Serial.printf("  [ESP-NOW ERROR] Fallo al enviar: %d\n", err); }
 
-            ei_impulse_result_t result = { 0 };
-            EI_IMPULSE_ERROR res = run_classifier(&signal, &result, false);
-
-            if (res == EI_IMPULSE_OK) {
-                diag_frames++;
-                bool positivo = false;
-                bool visto[NUM_CLASES] = {false};
-                float cmax[NUM_CLASES] = {0};
-                float amax[NUM_CLASES] = {0};
-                float mejor = 0.0;
-                float current_best_cx = -1.0;
-                float current_best_cy = -1.0;
-                uint8_t claseDet = 255;
-
-                for (size_t ix = 0; ix < result.bounding_boxes_count; ix++) {
-                    auto bb = result.bounding_boxes[ix];
-                    if (bb.value == 0) continue;
-                    diag_det_raw++;
-
-                    int idx = buscarClase(bb.label); 
-                    if (idx < 0) { 
-                        diag_desc_label++; 
-                        DBG_BOX("  [X] Descartada: Etiqueta desconocida '%s'\n", bb.label);
-                        continue; 
-                    }
-                    if (!CLASES[idx].activa) { 
-                        diag_desc_inactiva++; 
-                        DBG_BOX("  [X] Descartada: Clase '%s' inactiva\n", CLASES[idx].etiqueta);
-                        continue; 
-                    }
-
-                    if (bb.value < umbral_rt[idx]) { 
-                        diag_desc_conf++; 
-                        DBG_BOX("  [X] Descartada [%s]: Confianza %.2f < Umbral %.2f\n", CLASES[idx].etiqueta, bb.value, umbral_rt[idx]);
-                        continue; 
-                    }
-
-                    float area = (float)bb.width * (float)bb.height;
-                    if (bb.value > cmax[idx]) {
-                        visto[idx] = true;
-                        cmax[idx] = bb.value;
-                        amax[idx] = area;
-                    }
-
-                    if (area < area_rt[idx]) { 
-                        diag_desc_area++; 
-                        DBG_BOX("  [X] Descartada [%s]: Área %.0f < Mínima %.0f\n", CLASES[idx].etiqueta, area, area_rt[idx]);
-                        continue; 
-                    }
-
-                    // --- FILTRO 1: PIXELES EN MOVIMIENTO ---
-                    bool es_dinamico_pixeles = false;
-                    if (prev_gray_buffer != NULL) {
-                        int moving_pixels = 0; int total_pixels = 0;
-                        int start_x = max(0, (int)bb.x); int end_x = min(W, (int)(bb.x + bb.width));
-                        int start_y = max(0, (int)bb.y); int end_y = min(H, (int)(bb.y + bb.height));
-
-                        for (int y = start_y; y < end_y; y++) {
-                            int row_offset = y * W;
-                            for (int x = start_x; x < end_x; x++) {
-                                int pixel_idx = row_offset + x;
-                                int diff = abs((int)ei_buffer[pixel_idx] - (int)prev_gray_buffer[pixel_idx]);
-                                if (diff > MOTION_PIXEL_THRESHOLD) moving_pixels++;
-                                total_pixels++;
-                            }
-                        }
-                        if (total_pixels > 0) {
-                            float motion_ratio = (float)moving_pixels / (float)total_pixels;
-                            if (motion_ratio > MAX_MOTION_RATIO) { es_dinamico_pixeles = true; diag_desc_motion++; }
-                        }
-                    }
-                    if (es_dinamico_pixeles) {
-                        DBG_BOX("  [X] Descartada [%s]: Movimiento de píxeles detectado.\n", CLASES[idx].etiqueta);
-                        continue; 
-                    }
-
-                    // Calcular el centro actual
-                    float temp_cx = (off_x + (bb.x + bb.width / 2.0f) * src_w / (float)W) / (float)fbW;
-                    float temp_cy = (off_y + (bb.y + bb.height / 2.0f) * src_h / (float)H) / (float)fbH;
-                    
-                    // --- FILTRO 2: VELOCIDAD DE LA CAJA (MOVIMIENTO RÁPIDO) ---
-                    if (prev_frame_cx != -1.0 && prev_frame_cy != -1.0) {
-                        float dx = temp_cx - prev_frame_cx;
-                        float dy = temp_cy - prev_frame_cy;
-                        float velocidad = sqrt((dx * dx) + (dy * dy));
-                        
-                        // Si se movió más del umbral entre frames, es dinámico
-                        if (velocidad > MAX_BBOX_SPEED) { 
-                            diag_desc_motion++; 
-                            DBG_BOX("  [X] Descartada [%s]: Velocidad alta (%.2f > %.2f)\n", CLASES[idx].etiqueta, velocidad, MAX_BBOX_SPEED);
-                            continue; 
-                        }
-                    }
-
-                    if (bb.value > mejor) {
-                        mejor = bb.value;
-                        positivo = true;
-                        claseDet = (uint8_t)idx;
-                        current_best_cx = temp_cx;
-                        current_best_cy = temp_cy;
-                        
-                        Serial.printf("  [✓] DETECCIÓN VÁLIDA: %s (Conf: %.2f)\n", CLASES[idx].etiqueta, bb.value);
-                    }
-                }
-                
-                // Actualizamos la posición previa solo si hubo un positivo válido en este frame
-                if (positivo) {
-                    prev_frame_cx = current_best_cx;
-                    prev_frame_cy = current_best_cy;
-                    diag_pos_frame++;
-                }
-                
-                registrarCalibracion(visto, cmax, amax);
-
-                if (positivo) {
-                    framesSinDeteccion = 0;
-                    motorActivo = true;
-                    claseFinal = claseDet;               
-                } else {
-                    if (framesSinDeteccion < FRAMES_APAGAR) framesSinDeteccion++;
-                    if (framesSinDeteccion >= FRAMES_APAGAR) motorActivo = false;
-                }
-                bool activar = motorActivo;
-
-                portENTER_CRITICAL(&coordsMux);
-                last_detect = activar;
-                if (positivo) { 
-                    if (last_x == 0.0 && last_y == 0.0) {
-                        last_x = current_best_cx; 
-                        last_y = current_best_cy;
-                    } else {
-                        last_x = (last_x * 0.70f) + (current_best_cx * 0.30f);
-                        last_y = (last_y * 0.70f) + (current_best_cy * 0.30f);
-                    }
-                }
-                portEXIT_CRITICAL(&coordsMux);
-
-                bool enviar = activar && (calib_modo == CALIB_OFF); 
-
-                Serial.printf("  [WIN] pos=%d sinDet=%d/%d activar=%d enviar=%d modo=%d clase=%d conf=%.2f\n",
-                              positivo ? 1 : 0, framesSinDeteccion, FRAMES_APAGAR,
-                              activar ? 1 : 0, enviar ? 1 : 0, (int)calib_modo,
-                              (int)claseFinal, mejor);
-
-                if (enviar != last_envio) {
-                    if (enviar) diag_pkt_on++; else diag_pkt_off++;
-                    Serial.printf("  [ESP-NOW TX] %s (Clase: %s, Seq: %u)\n", 
-                                  enviar ? "ON" : "OFF", 
-                                  (enviar && claseFinal < NUM_CLASES) ? CLASES[claseFinal].etiqueta : "-", 
-                                  seq_paquete);
-                    last_envio = enviar;
-                }
-
-                PaqueteVision pkt;
-                pkt.magic   = 0xCE;
-                pkt.activar = enviar ? 1 : 0;
-                pkt.clase   = enviar ? claseFinal : 255;
-                pkt.seq     = seq_paquete++;
-                
-                esp_err_t err = esp_now_send(receptorMAC, (uint8_t*)&pkt, sizeof(pkt));
-                if (err != ESP_OK) {
-                    diag_send_err++;
-                    Serial.printf("  [ESP-NOW ERROR] Fallo al enviar: %d\n", err);
-                }
-
-                if (millis() - lastStatusMs > 5000) {
-                    lastStatusMs = millis();
-                    Serial.printf("[STAT] frames=%u det=%u pos=%u pktON=%u pktOFF=%u sendErr=%u txOk=%u txFail=%u\n",
-                                  diag_frames, diag_det_raw, diag_pos_frame,
-                                  diag_pkt_on, diag_pkt_off, (unsigned)diag_send_err, 
-                                  (unsigned)diag_tx_ok, (unsigned)diag_tx_fail);
-                }
-
-            } else {
-                Serial.println("Error en la vision de EI");
+            if (millis() - lastStatusMs > 5000) {
+                lastStatusMs = millis();
+                Serial.printf("[STAT] frames=%u det=%u pos=%u pktON=%u pktOFF=%u sendErr=%u txOk=%u txFail=%u camFail=%u strSkip=%u\n",
+                              diag_frames, diag_det_raw, diag_pos_frame,
+                              diag_pkt_on, diag_pkt_off, (unsigned)diag_send_err, 
+                              (unsigned)diag_tx_ok, (unsigned)diag_tx_fail,
+                              diag_cam_fail, diag_stream_skip);
             }
         } else {
-            Serial.println("Error convirtiendo JPEG a RGB");
+            Serial.println("Error en la vision de EI");
         }
 
         if (prev_gray_buffer != NULL) memcpy(prev_gray_buffer, ei_buffer, ei_len);
-        esp_camera_fb_return(fb);
-        
         vTaskDelay(pdMS_TO_TICKS(VISION_PERIODO_MS));
     }
 }
@@ -732,6 +751,19 @@ void setup() {
 
     if (!LittleFS.begin(true)) Serial.println("Error LittleFS");
 
+    // Crear Mutex de Cámara
+    camMutex = xSemaphoreCreateMutex();
+    if (!camMutex) {
+        Serial.println("ERROR CRITICO: no se pudo crear camMutex.");
+        return;
+    }
+
+    // Limpieza de credenciales WiFi viejas
+    WiFi.persistent(false);
+    WiFi.disconnect(true, true);
+    WiFi.mode(WIFI_OFF);
+    delay(200);
+
     WiFi.setTxPower(WIFI_POWER_19_5dBm); 
     WiFi.mode(WIFI_STA); 
     WiFi.setSleep(false); 
@@ -743,12 +775,13 @@ void setup() {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("\n[OK] WiFi conectado. IP: %s, Canal: %d\n", WiFi.localIP().toString().c_str(), WiFi.channel());
+        Serial.printf("\n[OK] WiFi conectado. SSID: %s, IP: %s, Canal: %d\n", 
+                      WiFi.SSID().c_str(), WiFi.localIP().toString().c_str(), WiFi.channel());
+    } else {
+        Serial.println("\n[ERROR] No se pudo conectar al AP.");
     }
 
-    // FORZAR CANAL FÍSICO
-    esp_wifi_set_channel(1, WIFI_SECOND_CHAN_NONE);
-
+    // NO forzamos esp_wifi_set_channel(1). Usamos el canal del AP automáticamente.
     setup_espnow();
 
     camera_config_t config;
@@ -763,16 +796,25 @@ void setup() {
     
     config.frame_size = FRAMESIZE_QVGA; 
     config.jpeg_quality = 14; 
-    config.fb_count = 3; 
-    config.grab_mode = CAMERA_GRAB_LATEST; 
+    config.fb_count = 2;                       // Estable para compartir
+    config.grab_mode = CAMERA_GRAB_WHEN_EMPTY; // Estable para compartir
 
-    if (esp_camera_init(&config) != ESP_OK) {
-        Serial.println("Error cámara");
-        return;
+    esp_err_t cam_err = esp_camera_init(&config);
+    Serial.printf("[CAM] esp_camera_init -> %d (%s)\n", cam_err, esp_err_to_name(cam_err));
+    if (cam_err != ESP_OK) return;
+
+    sensor_t *s = esp_camera_sensor_get();
+    if (s) Serial.printf("[CAM] sensor PID=0x%02X\n", s->id.PID);
+    
+    // Warmup inicial antes de lanzar tareas concurrentes
+    for (int i = 0; i < CAM_WARMUP_FRAMES; i++) {
+        camera_fb_t *w = cam_grab(1000);
+        if (w) { Serial.printf("[CAM] warmup %d OK len=%u\n", i, w->len); cam_release(w); }
+        else   { Serial.printf("[CAM] warmup %d FALLO\n", i); }
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
     
     Iniciar_Servidor_Camara();
-
     xTaskCreatePinnedToCore(vision_task, "Vision", 16384, NULL, 1, NULL, 1);
 }
 

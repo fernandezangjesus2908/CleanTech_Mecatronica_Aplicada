@@ -1,28 +1,29 @@
 {
-	"folders": [
-		{
-			"name": "Sistema Mecatronica Aplicada",
-			"path": "../Sistema Mecatronica Aplicada"
-		},
-		{
-			"name": "Sistema de camara Mecatronica aplicada",
-			"path": "."
-		},
-		{
-			"path": "../SADI-PID"
-		},
-		{
-			"path": "../Smart-Allen"
-		},
-		{
-			"path": "../../../../Descargas/Esp32-s3-Parte_Final_SionoRaza"
-		},
-		{
-			"path": "../../../../Descargas/Sistema de simulacion mecanica(1)"
-		}
-	],
-	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "SADI-PID",
-		"dotnet.defaultSolution": "Pagina de Doki Doki Physics Club/Juego_GODOT/ddpc---doki-doki-fangame/DDPC - Doki Doki Fangame.sln"
-	}
+  "folders": [
+    {
+      "name": "Sistema Mecatronica Aplicada",
+      "path": "../Sistema Mecatronica Aplicada"
+    },
+    {
+      "name": "Sistema de camara Mecatronica aplicada",
+      "path": "."
+    },
+    {
+      "path": "../SADI-PID"
+    },
+    {
+      "path": "../Smart-Allen"
+    },
+    {
+      "path": "../../../Programacion_Avanzada_Rust"
+    },
+    {
+      "path": "../Yolo_Sistema de camara Mecatronica aplicada"
+    }
+  ],
+  "settings": {
+    "liveServer.settings.multiRootWorkspaceName": "SADI-PID",
+    "dotnet.defaultSolution": "Pagina de Doki Doki Physics Club/Juego_GODOT/ddpc---doki-doki-fangame/DDPC - Doki Doki Fangame.sln",
+    "C_Cpp.intelliSenseEngine": "disabled",
+  },
 }
